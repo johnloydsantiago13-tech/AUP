@@ -15,6 +15,10 @@ if (isset($_POST['register'])) {
     $checkEmailQ->execute();
     $checkEmailQ->store_result();
 
+    function validate($username) {
+        return preg_match('/[^a-zA-Z0-9_]/', $username);
+    }
+
 
     if ($checkEmailQ->num_rows > 0) {
         $_SESSION['reg_error'] = 'Email already exist.';    
@@ -25,7 +29,11 @@ if (isset($_POST['register'])) {
             $_SESSION['active_form'] = 'register';
         }
         else {
-            if ($_POST['password'] !== $_POST['cpassword']) {
+            if (validate($username)) {
+                $_SESSION['reg_error'] = "Username cannot contain any special characters.";
+                $_SESSION['active_form'] = 'register';
+            }
+            else if ($_POST['password'] !== $_POST['cpassword']) {
                 $_SESSION['pass_error'] = 'Password do not match.';
                 $_SESSION['active_form'] = 'register';
 
