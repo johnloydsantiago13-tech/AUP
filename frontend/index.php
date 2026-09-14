@@ -51,7 +51,7 @@
                     <?= showError($error['password']); ?>
                     
                     <select name="Role" required>
-                        <option value="" ddwisabled selected>--Select Role--</option>
+                        <option value="" disabled selected>--Select Role--</option>
                         <option value="Client">Client</option>
                         <option value="Developer">Developer</option>
                     </select>       
