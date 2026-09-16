@@ -65,7 +65,7 @@ if (isset($_POST['register'])) {
         }
     }
     else {
-        $_SESSION['ys_error'] = 'SINO KABA? DIKA AU BOI';
+        $_SESSION['ys_error'] = 'Invalid year or section. Please check your input.';
         $_SESSION['active_form'] = 'register';
     }
 } 
