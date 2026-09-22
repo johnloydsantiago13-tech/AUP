@@ -1,0 +1,132 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap");
+
+:root {
+  --primary-color: #333;
+  --second-color: whitesmoke;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "poppins";
+}
+
+body {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+  padding: 15px 30px;
+  background-color: var(--primary-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+
+.logo-group {
+  display: flex;
+  align-items: center;
+  gap: 12px; 
+}
+
+.logo-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: #446ee2; 
+  color: #ffff09;      
+  font-weight: bold;
+  font-size: 16px;
+  border-radius: 6px;        
+}
+
+.logo-group h2 {
+  margin: 0;
+  font-size: 22px;
+  color: var(--second-color)
+}
+
+.sidebar {
+  flex: 0 0 200px;
+  background-color: #f4f4f4;
+  padding: 20px 10px;
+  min-height: calc(100vh - 70px);
+  border-right: 2px solid var(--primary-color);
+}
+
+.nav-links {
+  list-style-type: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+
+  a {
+    text-decoration: none;
+    color: #333;
+    padding: 10px 0;
+    transition: background-color 0.3s ease;
+    border-radius: 10px;
+    &:hover {
+      background-color: var(--primary-color);
+      color: var(--second-color);
+      border-radius: 10px;
+    }
+  }
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  width: 100%;
+
+.main-topbar {
+  flex: 1;
+  min-width: 0;
+  padding: 20px;
+}
+
+.main-boxes {
+  display: flex;
+  gap: 50px;
+  margin-bottom: 30px;
+}
+
+.first-box,
+.first-box1 {
+  background-color: var(--second-color);
+  border: 4px solid var(--primary-color);
+  min-height: 200px;
+  padding: 20px;
+  border-radius: 20px;
+  width: 350px;
+
+}
+
+.Second-box {
+  background-color: var(--second-color);
+  border: 4px solid var(--primary-color);
+  min-height: 200px;
+  width: 60%;
+  border-radius: 20px;
+  padding: 20px;
+}
+}
+
+
+
+
+
+
+
+
