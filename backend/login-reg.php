@@ -99,6 +99,7 @@ if (isset($_POST['login'])) {
         if (password_verify($password, $user['password'])) {
             $_SESSION['username'] = $user['username'];
             $_SESSION['email'] = $user['email'];
+            $_SESSION['role'] = $user['role'];
             if ($user['role'] === 'Client') {
                 header("Location: ../frontend/Client.php");
             } else if ($user['role'] === 'Developer') {

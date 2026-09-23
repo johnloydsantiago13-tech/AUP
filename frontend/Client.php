@@ -19,6 +19,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'Client');
             <h2>AUProject</h2>
         </div>
     </nav>
+    
     <div class="main-content">
         <div class="sidebar">
             <div class="nav-links">
@@ -31,6 +32,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'Client');
         </div>
 
         <div class="main-topbar">
+            <p id="mainC"><b>CLIENT DASHBOARD</b></p>
             <h1>Welcome, <?php echo $username; ?>!</h1>
             <p>This is your dashboard.</p>
                 <div class="main-boxes">
@@ -49,9 +51,13 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'Client');
                 </div>
 
                 <div class="Second-box">
-                    <div>
+                    <div class="Second-left">
                         <h2>My Projects</h2>
-                        <p>No projects yet.</p>
+                        <p id ="p1">No projects yet.</p>
+                        <a href="ClientPostProject.php" id ="ButtonP"><b>Create your First Project</a>
+                    </div>
+                    <div class="Second-right">
+                        <a href="ClientBids.php" id ="ButtonP">View Project</b></a>
                     </div>
                 </div>
         </div>
