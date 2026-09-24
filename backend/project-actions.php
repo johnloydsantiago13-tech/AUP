@@ -39,7 +39,7 @@ if (isset($_POST['create_project'])) {
             );
 
             if (!$createProjectQ->execute()) {
-                $_SESSION['project_error'] = 'Project could not be posted. Please try again.';
+                $_SESSION['project_error'] = 'Please try again.';
             } else {
                 $_SESSION['project_success'] = 'Project posted successfully.';
             }
