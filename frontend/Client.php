@@ -65,12 +65,20 @@ $projectCount = $result->num_rows;
                 </div>
 
                 <div class="Second-box">
-                    <div class="Second-left">
-                        <h2>My Projects</h2>
+                    <div class="Second-top">
+                        <div class="Second-left">
+                            <h2>My Projects</h2>
+                        </div>
+                        <div class="Second-right">
+                            <a href="ClientBids.php" id="ButtonP">View Project &#128065;</a>
+                        </div>
+                    </div>
+
+                    <div class="Second-box-bottom">
                         <?php if ($projectCount == 0) { ?>
                         <p id="p1">No projects yet.</p>
                         <a href="ClientPostProject.php" id="ButtonP"><b>Create your First Project</b></a>
-                        <?php } 
+                        <?php }
                         else {
                         while ($row = $result->fetch_assoc()) {
                         ?>
@@ -81,10 +89,6 @@ $projectCount = $result->num_rows;
                             <p>Deadline: <?php echo date('F j, Y', strtotime($row['deadline'])); ?></p>
                         </div>
                         <?php }} ?>
-                    </div>
-
-                    <div class="Second-right">
-                        <a href="ClientBids.php" id="ButtonP">View Project &#128065;</a>
                     </div>
                 </div>
         </div>

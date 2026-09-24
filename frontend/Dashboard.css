@@ -121,36 +121,54 @@ body {
 
   .Second-box {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 20px;
   background-color: var(--second-color);
   border: 4px solid var(--primary-color);
   min-height: 200px;
   width: 1000px;
   border-radius: 20px;
   padding: 20px;
+  box-sizing: border-box;
 
+  .Second-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
-  .Second-left {
+    h2 {
+      margin: 0;
+    }
+    #ButtonP {
+      color: var(--third-color);
+      text-decoration: none;
+    }
+  }
+
+  .Second-box-bottom {
+    display: flex;
+    flex-direction: column;
+
+    .dash-project {
+      border-bottom: 4px solid palegoldenrod;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+    .dash-project:last-child {
+      border-bottom: none;
+      margin: 0;
+    }
+    
     #p1 {
-      padding-top: 60px;
+      padding-top: 20px;
       padding-bottom: 10px;
     }
     #ButtonP {
       color: var(--third-color);
       text-decoration: none;
     }
-
   }
-
-  .Second-right{
-    #ButtonP {
-    color: var(--third-color);
-    text-decoration: none;
-
-    }
-
-  }
-  }
+  } 
 
   .main-topbar {
     display: flex;
