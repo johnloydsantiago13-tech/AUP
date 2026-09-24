@@ -38,12 +38,12 @@ if (isset($_POST['update_profile'])) {
         $_SESSION['profile_error'] = 'The Instagram field must contain an Instagram URL.';
     } 
     else {
-    $updateProfileQ = $conn->prepare("UPDATE users SET facebook_url = ?, instagram_url = ? WHERE email = ?");
+        $updateProfileQ = $conn->prepare("UPDATE users SET facebook_url = ?, instagram_url = ? WHERE email = ?");
     if (!$updateProfileQ) {
         $_SESSION['profile_error'] = 'Unable to prepare the profile update.';
     } 
     else {
-    $updateProfileQ->bind_param('sss', $facebookUrl, $instagramUrl, $email);
+        $updateProfileQ->bind_param('sss', $facebookUrl, $instagramUrl, $email);
     if (!$updateProfileQ->execute()) {
         $_SESSION['profile_error'] = 'Profile update failed. Please try again.';
     } 

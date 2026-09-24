@@ -27,7 +27,7 @@
         <title>AU Projects</title>
         <link rel="stylesheet" href="main.css">
     </head>
-    <body>
+    <body>        
         <div class="container">
             <div class="form-box <?= showForm('login', $activeForm); ?>" id="loginBox">
                 <h2>Login to AU Projects</h2>

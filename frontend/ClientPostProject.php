@@ -39,22 +39,25 @@ unset($_SESSION['project_error'], $_SESSION['project_success']);
             <div class="prop">
                 <h1>Post Project</h1>
                 <p>Here You Can Post Project U Wanted </p>
-                <?php if ($projectError): ?><p class="error"><?= htmlspecialchars($projectError, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
-                <?php if ($projectSuccess): ?><p class="success"><?= htmlspecialchars($projectSuccess, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
             </div>
+            
             <form action="../backend/project-actions.php" method="POST" class ="probox">
                 <label for="title">Post Project</label>
-                <input type="text" name="title" placeholder="Project title" required>
+                <input type="text" name="title" placeholder="Project title">
                 <label for="category">Category</label>
-                <input type="text" name="category" placeholder="e.g. Web development" required>
+                <input type="text" name="category" placeholder="e.g. Web development">
                 <label for="description">Description</label>
-                <textarea name="description" placeholder="Project description" required></textarea>
+                <textarea name="description" placeholder="Project description" style="resize: none;"></textarea>
                 <label for="budget">Budget</label>
-                <input type="number" name="budget" placeholder="Budget" min="0" step="0.01" required>
+                <input type="number" name="budget" placeholder="Budget" min="0" step="0.01">
                 <label for="deadline">Deadline</label>
-                <input type="date" name="deadline" required>
+                <input type="date" name="deadline">
                 <br>
+                
                 <button type="submit" name="create_project" id="button2">Post Project</button>
+                <?php if ($projectError): ?><p class="error"><?= htmlspecialchars($projectError, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
+                <?php if ($projectSuccess): ?><p class="success"><?= htmlspecialchars($projectSuccess, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
+                    
             </form>
         </div>
     </div>

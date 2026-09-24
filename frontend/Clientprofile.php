@@ -22,13 +22,11 @@ $profileSuccess = $_SESSION['profile_success'] ?? '';
 unset($_SESSION['profile_error'], $_SESSION['profile_success']);
 
 function showError($message) {
-    return !empty($message)
-    ? "<p class='error'>" . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . "</p>": '';
+    return !empty($message) ? "<p class='error'>" . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . "</p>": '';
 }
 
 function showSuccess($message) {
-    return !empty($message)
-    ? "<p class='success'>" . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . "</p>": '';
+    return !empty($message) ? "<p class='success'>" . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . "</p>": '';
 }
 ?>
 
@@ -65,11 +63,11 @@ function showSuccess($message) {
             </div>
             <form action="../backend/profile-actions.php" method="POST" class="pf1">
                 <div class="pf-left">    
-                    <label for="facebook_url"><b>Facebook URL : </b></label>
+                    <label for="facebook_url"><b>Facebook Name :</b></label>
                     <input type="text" id="facebook_url" name="facebook_url" placeholder="https://facebook.com/username" value="<?= htmlspecialchars($facebookUrl, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
                 <div class ="pf-right">
-                    <label for="instagram_url"><b>Instagram URL : </b></label>
+                    <label for="instagram_url"><b>Instagram Name :</b></label>
                     <input type="text" id="instagram_url" name="instagram_url" placeholder="https://instagram.com/username" value="<?= htmlspecialchars($instagramUrl, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
                 <button type="submit" name="update_profile" id="button1">Save Profile</button>

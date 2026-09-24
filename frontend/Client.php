@@ -56,8 +56,9 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'Client');
                         <p id ="p1">No projects yet.</p>
                         <a href="ClientPostProject.php" id ="ButtonP"><b>Create your First Project</a>
                     </div>
+
                     <div class="Second-right">
-                        <a href="ClientBids.php" id ="ButtonP">View Project</b></a>
+                        <a href="ClientBids.php" id ="ButtonP">View Project &#128065</b></a>
                     </div>
                 </div>
         </div>

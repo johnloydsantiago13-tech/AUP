@@ -93,41 +93,42 @@ body {
   flex: 1;
   width: 100%;
 
-.main-topbar {
+  .main-topbar {
   flex: 1;
   min-width: 0;
   padding: 20px;
   #mainC{
     color: var(--third-color);
   }
-}
+  }
 
-.main-boxes {
+  .main-boxes {
   display: flex;
   gap: 50px;
   margin-bottom: 30px;
-}
+  }
 
-.first-box,
-.first-box1 {
+  .first-box,
+  .first-box1 {
   background-color: var(--second-color);
   border: 4px solid var(--primary-color);
   min-height: 200px;
   padding: 20px;
   border-radius: 20px;
-  width: 350px;
+  width: 475px;
 
-}
+  }
 
-.Second-box {
+  .Second-box {
   display: flex;
   justify-content: space-between;
   background-color: var(--second-color);
   border: 4px solid var(--primary-color);
   min-height: 200px;
-  width: 60%;
+  width: 1000px;
   border-radius: 20px;
   padding: 20px;
+
 
   .Second-left {
     #p1 {
@@ -138,14 +139,18 @@ body {
       color: var(--third-color);
       text-decoration: none;
     }
+
   }
+
   .Second-right{
     #ButtonP {
     color: var(--third-color);
     text-decoration: none;
+
     }
+
   }
-}
+  }
 
   .main-topbar {
     display: flex;
@@ -216,7 +221,7 @@ body {
     flex-direction: column;
     border: 3px solid var(--primary-color);
     background-color: whitesmoke;
-    height: 400px;
+    height: 450px;
     width: 600px;
     border-radius: 20px;
     padding: 20px;
@@ -236,7 +241,72 @@ body {
       background-color: #082c91;
     }
   }
-  
   }
-}
 
+  .my-project {
+    padding: 20px;
+  }
+
+  .my-project-box {
+    display: flex;
+    flex-direction: column;
+    border: 4px solid var(--primary-color);
+    height: 400px;
+    width: 650px;
+    border-radius: 20px;
+    margin-top: 20px;
+    background-color: var(--second-color);
+    .project-Head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 20px;
+      border-bottom: 4px solid var(--primary-color);
+      .pcard-right {
+        padding: 20px;
+      }
+      .pcard-left {
+        padding: 5px 10px;
+        button{
+        width: 1.2rem;
+        border: none;
+        transition: 0.3s ease;
+        font-size: 1.3rem;
+        background-color: transparent;
+        font-size: 30px;
+        &:hover {
+          color: darkred;
+          transform: scale(1.5);
+          
+          }
+        }
+      }
+    }
+    .project-Details {
+    padding: 20px;
+    border-bottom: 4px solid var(--primary-color);
+      .pro-Details {
+        padding-bottom: 20px;
+      }
+      .PBD {
+        display: flex;
+        gap: 60px;
+      }
+      .pro-post {
+        display: flex;
+        justify-content: flex-end;
+        h5{
+          background-color: #dcfce7;
+          color: #15803d;
+          border: 1px solid #86efac;
+          border-radius: 20px;
+          padding: 2px;
+        }
+      }
+    }
+    .bid-auction {
+      padding: 10px;
+    }
+  }
+  
+}
