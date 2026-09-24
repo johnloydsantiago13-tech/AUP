@@ -78,7 +78,7 @@ $projectCount = $result->num_rows;
                             <h3><?php echo htmlspecialchars($row['title']); ?></h3>
                             <p><?php echo htmlspecialchars($row['category']); ?></p>
                             <p>Budget: $<?php echo $row['budget']; ?></p>
-                            <p>Deadline: <?php echo $row['deadline']; ?></p>
+                            <p>Deadline: <?php echo date('F j, Y', strtotime($row['deadline'])); ?></p>
                         </div>
                         <?php }} ?>
                     </div>

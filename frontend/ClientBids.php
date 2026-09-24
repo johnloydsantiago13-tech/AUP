@@ -112,7 +112,7 @@ $result = $query->get_result();
                         </div>
                         <div class="project-deadline">
                             <h3>Deadline</h3>
-                            <strong><?php echo $row['deadline']; ?></strong>
+                            <strong><?php echo date('m-d-Y', strtotime($row['deadline'])); ?></strong>
                         </div>
                     </div>
                     <div class="pro-post">
