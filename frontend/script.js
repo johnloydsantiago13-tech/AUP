@@ -10,3 +10,8 @@ document.querySelectorAll('[data-form]').forEach(function (link) {
         showForm(link.dataset.form);
     });
 });
+
+function editField(field) {
+    document.getElementById(field + '-view').style.display = 'none';
+    document.getElementById(field + '-edit').style.display = 'block';
+}

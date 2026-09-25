@@ -23,8 +23,9 @@ if (empty($_SESSION['email'])) {
     exit();
 }
 
+$email = $_SESSION['email'];
+
 if (isset($_POST['update_profile'])) {
-    $email = $_SESSION['email'];
     $facebookUrl = trim($_POST['facebook_url'] ?? '');
     $instagramUrl = trim($_POST['instagram_url'] ?? '');
 
@@ -52,6 +53,44 @@ if (isset($_POST['update_profile'])) {
     }
     }
 }
+
+header('Location: ../frontend/Clientprofile.php');
+exit();
+}
+
+if (isset($_POST['update_password'])) {
+    $currentPassword = $_POST['current_password'] ?? '';
+    $newPassword = $_POST['new_password'] ?? '';
+    $confirmPassword = $_POST['confirm_password'] ?? '';
+
+    $userQ = $conn->prepare("SELECT password FROM users WHERE email = ?");
+    $userQ->bind_param('s', $email);
+    $userQ->execute();
+    $user = $userQ->get_result()->fetch_assoc();
+
+    if (!$user || !password_verify($currentPassword, $user['password'])) {
+        $_SESSION['password_error'] = 'Current password is incorrect.';
+    }
+    elseif (strlen($newPassword) < 8) {
+        $_SESSION['password_error'] = 'New password must be 8 or more characters.';
+    }
+    elseif ($newPassword !== $confirmPassword) {
+        $_SESSION['password_error'] = 'New password and confirmation do not match.';
+    }
+    else {
+        $newHashed = password_hash($newPassword, PASSWORD_DEFAULT);
+        $updatePasswordQ = $conn->prepare("UPDATE users SET password = ? WHERE email = ?");
+        $updatePasswordQ->bind_param('ss', $newHashed, $email);
+        
+        if ($updatePasswordQ->execute()) {
+            $_SESSION['password_success'] = 'Password updated successfully.';
+        } else {
+            $_SESSION['password_error'] = 'Password could not be updated. Please try again.';
+        }
+    }
+
+header('Location: ../frontend/Clientprofile.php');
+exit();
 }
 
 header('Location: ../frontend/Clientprofile.php');
