@@ -351,5 +351,28 @@ body {
       padding: 10px;
     }
   }
-  
+  .dev-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .dev-card {
+    background-color: var(--second-color);
+    border: 4px solid var(--primary-color);
+    border-radius: 20px;
+    padding: 20px;
+    width: 650px;
+  }
+
+  .dev-links {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+  }
+
+  .dev-links a {
+    color: var(--third-color);
+    text-decoration: none;
+  }
 }

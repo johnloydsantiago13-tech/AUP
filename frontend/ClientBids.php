@@ -42,6 +42,7 @@ $result = $query->get_result();
             <a href="ClientProfile.php">Profile</a>
             <a href="ClientPostProject.php">Post Projects</a>
             <a href="ClientBids.php">My Projects</a>
+            <a href="ClientBrowseDevelopers.php">Browse Developers</a>
             <a href="../frontend/index.php">Logout</a>
             </div>
         </div>
