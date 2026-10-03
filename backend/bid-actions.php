@@ -11,7 +11,7 @@ $action = $_POST['action'] ?? '';
 $bidId = filter_var($_POST['bid_id'] ?? null, FILTER_VALIDATE_INT);
 $clientEmail = $_SESSION['email'];
 
-if ($action !== 'accept' || !$bidId) {
+if (!in_array($action, ['accept', 'reject'], true) || !$bidId) {
     header('Location: ../frontend/ClientBids.php');
     exit();
 }
@@ -20,7 +20,7 @@ $bidQuery = $conn->prepare(
     "SELECT bids.bid_id, bids.project_id
      FROM bids
      INNER JOIN projects ON projects.project_id = bids.project_id
-     WHERE bids.bid_id = ? AND projects.client_email = ? AND bids.status = 'Pending'
+     WHERE bids.bid_id = ? AND projects.client_email = ? AND bids.status = 'pending'
      LIMIT 1"
 );
 $bidQuery->bind_param('is', $bidId, $clientEmail);
@@ -33,14 +33,28 @@ if (!$bid) {
     exit();
 }
 
+if ($action === 'reject') {
+    $rejectBid = $conn->prepare("UPDATE bids SET status = 'rejected' WHERE bid_id = ? AND status = 'pending'");
+    $rejectBid->bind_param('i', $bidId);
+
+    if ($rejectBid->execute() && $rejectBid->affected_rows === 1) {
+        $_SESSION['project_success'] = 'Bid rejected.';
+    } else {
+        $_SESSION['project_error'] = 'The bid could not be rejected.';
+    }
+
+    header('Location: ../frontend/ClientBids.php?id=' . (int) $bid['project_id']);
+    exit();
+}
+
 $conn->begin_transaction();
-$acceptBid = $conn->prepare("UPDATE bids SET status = 'Accepted' WHERE bid_id = ?");
+$acceptBid = $conn->prepare("UPDATE bids SET status = 'accepted' WHERE bid_id = ?");
 $acceptBid->bind_param('i', $bidId);
 $acceptSucceeded = $acceptBid->execute();
 
 $rejectOthers = $conn->prepare(
-    "UPDATE bids SET status = 'Rejected'
-     WHERE project_id = ? AND bid_id <> ? AND status = 'Pending'"
+    "UPDATE bids SET status = 'rejected'
+     WHERE project_id = ? AND bid_id <> ? AND status = 'pending'"
 );
 $rejectOthers->bind_param('ii', $bid['project_id'], $bidId);
 $rejectSucceeded = $rejectOthers->execute();

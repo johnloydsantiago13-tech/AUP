@@ -26,11 +26,11 @@ $passwordError = $_SESSION['password_error'] ?? '';
 $passwordSuccess = $_SESSION['password_success'] ?? '';
 unset($_SESSION['password_error'], $_SESSION['password_success']);
 
-function showError($message) {
+function showError(string $message) {
     return !empty($message) ? "<p class='error'>" . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . "</p>": '';
 }
 
-function showSuccess($message) {
+function showSuccess(string $message) {
     return !empty($message) ? "<p class='success'>" . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . "</p>": '';
 }
 ?>
@@ -54,7 +54,7 @@ function showSuccess($message) {
         <div class="sidebar">
             <div class="nav-links">
             <a href="Client.php">Dashboard</a>
-            <a href="ClientProfile.php">Profile</a>
+            <a href="Clientprofile.php">Profile</a>
             <a href="ClientPostProject.php">Post Projects</a>
             <a href="ClientBids.php">My Projects</a>
             <a href="ClientBrowseDevelopers.php">Browse Developers</a>
