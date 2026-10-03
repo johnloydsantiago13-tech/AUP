@@ -12,7 +12,7 @@ $projectId = filter_var($_POST['project_id'] ?? null, FILTER_VALIDATE_INT);
 $clientEmail = $_SESSION['email'];
 
 if (!$projectId || $action !== 'delete') {
-    header('Location: ../frontend/ClientBids.php');
+    header('Location: ../frontend/Client.php?page=projects');
     exit();
 }
 
@@ -22,7 +22,7 @@ $ownership->execute();
 
 if ($ownership->get_result()->num_rows !== 1) {
     $_SESSION['project_error'] = 'Project not found or you do not own this project.';
-    header('Location: ../frontend/ClientBids.php');
+    header('Location: ../frontend/Client.php?page=projects');
     exit();
 }
 
@@ -34,6 +34,6 @@ $_SESSION[$deleteSucceeded ? 'project_success' : 'project_error'] = $deleteSucce
     ? 'Project deleted successfully.'
     : 'Project cant not be deleted.';
 
-header('Location: ../frontend/ClientBids.php');
+header('Location: ../frontend/Client.php?page=projects');
 exit();
 ?>

@@ -12,7 +12,7 @@ $bidId = filter_var($_POST['bid_id'] ?? null, FILTER_VALIDATE_INT);
 $clientEmail = $_SESSION['email'];
 
 if (!in_array($action, ['accept', 'reject'], true) || !$bidId) {
-    header('Location: ../frontend/ClientBids.php');
+    header('Location: ../frontend/Client.php?page=projects');
     exit();
 }
 
@@ -29,7 +29,7 @@ $bid = $bidQuery->get_result()->fetch_assoc();
 
 if (!$bid) {
     $_SESSION['project_error'] = 'This bid is no longer available.';
-    header('Location: ../frontend/ClientBids.php');
+    header('Location: ../frontend/Client.php?page=projects');
     exit();
 }
 
@@ -43,7 +43,7 @@ if ($action === 'reject') {
         $_SESSION['project_error'] = 'The bid could not be rejected.';
     }
 
-    header('Location: ../frontend/ClientBids.php?id=' . (int) $bid['project_id']);
+    header('Location: ../frontend/Client.php?page=projects&id=' . (int) $bid['project_id']);
     exit();
 }
 
@@ -71,7 +71,7 @@ if ($acceptSucceeded && $rejectSucceeded && $projectSucceeded) {
     $_SESSION['project_error'] = 'The bid could not be accepted.';
 }
 
-header('Location: ../frontend/ClientBids.php?id=' . (int) $bid['project_id']);
+header('Location: ../frontend/Client.php?page=projects&id=' . (int) $bid['project_id']);
 exit();
 ?>
 
@@ -91,7 +91,7 @@ $projectId = filter_var($_POST['project_id'] ?? null, FILTER_VALIDATE_INT);
 $clientEmail = $_SESSION['email'];
 
 if (!$projectId || $action !== 'delete') {
-    header('Location: ../frontend/ClientBids.php');
+    header('Location: ../frontend/Client.php?page=projects');
     exit();
 }
 
@@ -101,7 +101,7 @@ $ownership->execute();
 
 if ($ownership->get_result()->num_rows !== 1) {
     $_SESSION['project_error'] = 'Project not found or you do not own this project.';
-    header('Location: ../frontend/ClientBids.php');
+    header('Location: ../frontend/Client.php?page=projects');
     exit();
 }
 
@@ -112,7 +112,7 @@ $deleteSucceeded = $delete->execute();
 $_SESSION[$deleteSucceeded ? 'project_success' : 'project_error'] = $deleteSucceeded
     ? 'Project deleted successfully.'
     : 'Project could not be deleted.';
-header('Location: ../frontend/ClientBids.php');
+header('Location: ../frontend/Client.php?page=projects');
 exit();
 }
 

@@ -1,6 +1,11 @@
     <?php
         session_start();
 
+        if (!empty($_SESSION['email'])) {
+            unset($_SESSION['email'], $_SESSION['username'], $_SESSION['role']);
+            session_regenerate_id(true);
+        }
+
         $error = [
             'login' => $_SESSION['log_error'] ?? '',
             'register' => $_SESSION['reg_error'] ?? '',
