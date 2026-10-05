@@ -158,7 +158,7 @@ if ($page === 'developers') {
                         <span class="account-name"><?php echo htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8'); ?></span>
                         <span class="account-menu-icon" aria-hidden="true"><i></i><i></i><i></i></span>
                     </button>
-                    <div class="account-dropdown" id="developer-account-dropdown" hidden>
+                    <div class="account-dropdown" id="client-account-dropdown" hidden>
                         <a href="Client.php?page=profile&amp;modal=1">Profile</a>
                         <a href="index.php">Logout</a>
                     </div>
@@ -342,7 +342,7 @@ if ($page === 'developers') {
                         <div class="project-form-row">
                             <div class="profile-field">
                                 <label for="budget">Budget (₱)</label>
-                                <input type="number" id="budget" name="budget" placeholder="2000" min="0.01" step="0.01" required>
+                                <input type="number" id="budget" name="budget" placeholder="0" required>
                             </div>
                             <div class="profile-field">
                                 <label for="deadline">Deadline</label>
