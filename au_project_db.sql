@@ -35,8 +35,71 @@ CREATE TABLE `users` (
   `role` enum('Client','Developer') NOT NULL,
   `profile_image` mediumblob DEFAULT NULL,
   `facebook_url` varchar(255) DEFAULT NULL,
-  `instagram_url` varchar(255) DEFAULT NULL
+  `instagram_url` varchar(255) DEFAULT NULL,
+  `about_me` text DEFAULT NULL,
+  `skills` text DEFAULT NULL,
+  `course` varchar(100) DEFAULT NULL,
+  `year_level` varchar(30) DEFAULT NULL,
+  `portfolio_url` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `projects`
+--
+
+CREATE TABLE `projects` (
+  `project_id` int(11) NOT NULL,
+  `client_email` varchar(255) NOT NULL,
+  `title` varchar(150) NOT NULL,
+  `category` varchar(100) NOT NULL,
+  `description` text NOT NULL,
+  `budget` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `deadline` date NOT NULL,
+  `status` varchar(30) NOT NULL DEFAULT 'Open',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `required_skills` text DEFAULT NULL,
+  `year_level` varchar(30) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Table structure for table `bids`
+--
+
+CREATE TABLE `bids` (
+  `bid_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `developer_email` varchar(255) NOT NULL,
+  `proposed_price` decimal(10,2) NOT NULL,
+  `timeline` varchar(100) NOT NULL,
+  `message` text NOT NULL,
+  `status` enum('pending','accepted','rejected') DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Table structure for table `ys`, used by developer registration
+--
+
+CREATE TABLE `ys` (
+  `Year` varchar(255) DEFAULT NULL,
+  `Section` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `ys` (`Year`, `Section`) VALUES
+('1', 'A'),
+('1', 'B'),
+('2', 'A'),
+('2', 'B'),
+('3', 'A'),
+('3', 'B'),
+('4', 'A'),
+('4', 'B'),
+('BSIT1', 'SOUTH1'),
+('BSIT2', 'SOUTH2'),
+('BSIT3', 'SOUTH3'),
+('BSIT4', 'SOUTH4');
 
 --
 -- Dumping data for table `users`
@@ -64,6 +127,16 @@ ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`);
 
+ALTER TABLE `projects`
+  ADD PRIMARY KEY (`project_id`),
+  ADD KEY `client_email` (`client_email`),
+  ADD KEY `status` (`status`);
+
+ALTER TABLE `bids`
+  ADD PRIMARY KEY (`bid_id`),
+  ADD KEY `project_id` (`project_id`),
+  ADD CONSTRAINT `bids_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`);
+
 --
 -- AUTO_INCREMENT for dumped tables
 --
@@ -73,6 +146,12 @@ ALTER TABLE `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+ALTER TABLE `projects`
+  MODIFY `project_id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `bids`
+  MODIFY `bid_id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
