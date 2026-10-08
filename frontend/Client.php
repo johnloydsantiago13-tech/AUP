@@ -715,8 +715,9 @@ if ($page === 'developers') {
                             <h2 id="client-profile-title"><?php echo htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8'); ?></h2>
                             <p><?php echo htmlspecialchars($user['role'], ENT_QUOTES, 'UTF-8'); ?> · AUProject</p>
                         </div>
+
+                        <button class="profile-modal-close1" type="button" aria-label="Close profile" data-close-client-profile>&times;</button>
                     </div>
-                    <button class="profile-modal-close" type="button" aria-label="Close profile" data-close-client-profile>&times;</button>
                 </header>
                 <?php if ($profileError !== ''): ?><p class="error" role="alert"><?php echo htmlspecialchars($profileError, ENT_QUOTES, 'UTF-8'); ?></p><?php endif; ?>
                 <?php if ($profileSuccess !== ''): ?><p class="success" role="status"><?php echo htmlspecialchars($profileSuccess, ENT_QUOTES, 'UTF-8'); ?></p><?php endif; ?>

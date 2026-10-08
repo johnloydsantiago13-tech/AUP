@@ -949,7 +949,7 @@ h4 {
   padding: 22px;
 }
 
-.client-profile-modal .profile-modal-close {
+.client-profile-modal .profile-modal-close1 {
   cursor: pointer;
 }
 
@@ -1052,7 +1052,22 @@ h4 {
   outline-offset: 2px;
 }
 
-.profile-modal-close {
+.profile-modal-close1 {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--muted);
+  font-size: 28px;
+  line-height: 1;
+  text-decoration: none; 
+}
+
+.profile-modal-close{
   display: grid;
   width: 40px;
   height: 40px;
