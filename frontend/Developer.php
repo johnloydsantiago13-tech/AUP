@@ -20,9 +20,10 @@ if (!$user) {
     header('Location: index.php');
     exit();
 }
+$developerUserId = (int) $user['id'];
 
 $requestedPage = $_GET['page'] ?? 'dashboard';
-$allowedPages = ['dashboard', 'browse', 'bids', 'active'];
+$allowedPages = ['dashboard', 'browse', 'bids', 'active', 'completed'];
 $page = $requestedPage === 'profile' ? 'dashboard' : $requestedPage;
 if (!is_string($page) || !in_array($page, $allowedPages, true)) {
     http_response_code(404);
@@ -33,6 +34,7 @@ $titles = [
     'browse' => 'Browse Projects',
     'bids' => 'My Bids',
     'active' => 'My Active Projects',
+    'completed' => 'Completed Projects',
 ];
 $displayName = $user['username'] ?: 'Developer';
 $profileImage = !empty($user['profile_image']);
@@ -57,16 +59,13 @@ $bidStatsQuery = $conn->prepare(
     "SELECT COUNT(*) AS total_bids,
             COALESCE(SUM(status = 'pending'), 0) AS pending_bids,
             COALESCE(SUM(status = 'accepted'), 0) AS accepted_bids,
-            (SELECT COUNT(DISTINCT projects.project_id)
-             FROM bids completed_bids
-             INNER JOIN projects ON projects.project_id = completed_bids.project_id
-             WHERE completed_bids.developer_email = ?
-               AND completed_bids.status = 'accepted'
-               AND projects.status = 'Completed') AS completed_projects
+            (SELECT COUNT(DISTINCT project_id)
+             FROM developer_project_history
+             WHERE developer_id = ?) AS completed_projects
      FROM bids
      WHERE developer_email = ?"
 );
-$bidStatsQuery->bind_param('ss', $email, $email);
+$bidStatsQuery->bind_param('is', $developerUserId, $email);
 $bidStatsQuery->execute();
 $bidStats = $bidStatsQuery->get_result()->fetch_assoc();
 
@@ -149,14 +148,12 @@ $activeQuery->execute();
 $activeProjects = $activeQuery->get_result()->fetch_all(MYSQLI_ASSOC);
 
 $completedProjectsQuery = $conn->prepare(
-    "SELECT DISTINCT projects.title, projects.category, projects.description
-     FROM bids
-     INNER JOIN projects ON projects.project_id = bids.project_id
-     WHERE bids.developer_email = ? AND bids.status = 'accepted'
-       AND projects.status = 'Completed'
-     ORDER BY projects.project_id DESC"
+    "SELECT title, category, description, completed_at
+     FROM developer_project_history
+     WHERE developer_id = ?
+     ORDER BY completed_at DESC, history_id DESC"
 );
-$completedProjectsQuery->bind_param('s', $email);
+$completedProjectsQuery->bind_param('i', $developerUserId);
 $completedProjectsQuery->execute();
 $completedProjects = $completedProjectsQuery->get_result()->fetch_all(MYSQLI_ASSOC);
 
@@ -192,11 +189,16 @@ $selectedSkills = array_filter(array_map('trim', explode(',', $skills)));
                 <a href="Developer.php?page=browse" <?php echo $page === 'browse' ? 'aria-current="page"' : ''; ?>>Browse Projects</a>
                 <a href="Developer.php?page=bids" <?php echo $page === 'bids' ? 'aria-current="page"' : ''; ?>>My Bids</a>
                 <a href="Developer.php?page=active" <?php echo $page === 'active' ? 'aria-current="page"' : ''; ?>>My Active Projects</a>
+                <a href="Developer.php?page=completed" <?php echo $page === 'completed' ? 'aria-current="page"' : ''; ?>>Completed Projects</a>
             </nav>
         </aside>
 
         <div class="workspace">
             <nav class="navbar" aria-label="Workspace navigation">
+                <a class="mobile-navbar-brand logo-group" href="Developer.php" aria-label="AUProject developer dashboard">
+                    <span class="logo-box" aria-hidden="true">AUP</span>
+                    <span class="logo-name">AUProject</span>
+                </a>
                 <span class="navbar-label">Developer workspace</span>
                 <div class="account-menu" data-account-menu>
                     <button class="account-menu-toggle" type="button" aria-label="Open profile and logout menu" aria-expanded="false" aria-controls="developer-account-dropdown" data-menu-toggle>
@@ -238,6 +240,10 @@ $selectedSkills = array_filter(array_map('trim', explode(',', $skills)));
                             <p><?php echo (int) $bidStats['total_bids']; ?></p>
                         </a>
                         <a class="first-box developer-stat-link" href="Developer.php?page=active">
+                            <h2>Active projects</h2>
+                            <p><?php echo count($activeProjects); ?></p>
+                        </a>
+                        <a class="first-box1 developer-stat-link" href="Developer.php?page=completed">
                             <h2>Projects completed</h2>
                             <p><?php echo (int) $bidStats['completed_projects']; ?></p>
                         </a>
@@ -569,8 +575,34 @@ $selectedSkills = array_filter(array_map('trim', explode(',', $skills)));
                                                 <?php if (empty($project['client_facebook_url']) && empty($project['client_instagram_url'])): ?><span class="muted-text">No contact links shared.</span><?php endif; ?>
                                             </div>
                                         </div>
-                                        <p class="contact-access-note">Contact links are visible only to you and the client who accepted your proposal.</p>
                                     </section>
+                                </article>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+
+                <?php elseif ($page === 'completed'): ?>
+                    <header class="page-heading">
+                        <div>
+                            <p class="eyebrow">PROJECT HISTORY</p>
+                            <h1>Completed Projects</h1>
+                        </div>
+                    </header>
+                    <?php if (!$completedProjects): ?>
+                        <section class="empty-state">
+                            <h2>No completed projects yet</h2>
+                            <p>Projects marked complete by a client will appear here.</p>
+                        </section>
+                    <?php else: ?>
+                        <div class="completed-project-list developer-completed-project-list">
+                            <?php foreach ($completedProjects as $project): ?>
+                                <article class="completed-project-item">
+                                    <p class="eyebrow">COMPLETED PROJECT</p>
+                                    <h2><?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?></h2>
+                                    <p class="project-category"><?php echo htmlspecialchars($project['category'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                    <p><?php echo nl2br(htmlspecialchars($project['description'], ENT_QUOTES, 'UTF-8')); ?></p>
+                                    
+                                    <p class="completed-project-date">Completed <?php echo htmlspecialchars(date('F j, Y', strtotime($project['completed_at'])), ENT_QUOTES, 'UTF-8'); ?></p>
                                 </article>
                             <?php endforeach; ?>
                         </div>
@@ -643,7 +675,7 @@ $selectedSkills = array_filter(array_map('trim', explode(',', $skills)));
             </main>
             <dialog class="developer-profile-modal developer-settings-modal" aria-labelledby="developer-profile-title" data-developer-profile-modal>
                 <header class="developer-settings-modal-heading">
-                    <div><p class="eyebrow">YOUR PUBLIC PROFILE</p><h2 id="developer-profile-title">Edit profile</h2><p>This information is visible to logged-in clients in Browse Developers.</p></div>
+                    <div><p class="eyebrow">YOUR PUBLIC PROFILE</p><h2 id="developer-profile-title"></h2></div>
                     <button class="profile-modal-close" type="button" aria-label="Close profile" data-close-developer-profile>&times;</button>
                 </header>
                 <?php if ($profileError !== ''): ?><p class="error developer-settings-message" role="alert"><?php echo htmlspecialchars($profileError, ENT_QUOTES, 'UTF-8'); ?></p><?php endif; ?>
@@ -708,16 +740,12 @@ $selectedSkills = array_filter(array_map('trim', explode(',', $skills)));
             </dialog>
             <dialog class="developer-settings-modal" aria-labelledby="developer-settings-title" data-developer-settings-modal>
                 <header class="developer-settings-modal-heading">
-                    <div><p class="eyebrow">PRIVATE ACCOUNT</p><h2 id="developer-settings-title">Settings</h2><p>Email and password are private and are never shown to clients.</p></div>
+                    <div><p class="eyebrow">PRIVATE ACCOUNT</p><h2 id="developer-settings-title">Settings</h2></div>
                     <button class="profile-modal-close" type="button" aria-label="Close settings" data-close-developer-settings>&times;</button>
                 </header>
                 <?php if ($passwordError !== ''): ?><p class="error developer-settings-message" role="alert"><?php echo htmlspecialchars($passwordError, ENT_QUOTES, 'UTF-8'); ?></p><?php endif; ?>
                 <?php if ($passwordSuccess !== ''): ?><p class="success developer-settings-message" role="status"><?php echo htmlspecialchars($passwordSuccess, ENT_QUOTES, 'UTF-8'); ?></p><?php endif; ?>
                 <div class="developer-settings-card">
-                    <div class="developer-settings-email">
-                        <div><p class="eyebrow">SIGN-IN EMAIL</p><h3>Email address</h3><p>This address is used to sign in and is never visible to clients.</p></div>
-                        <div class="profile-field"><label for="developer-settings-email">Email address</label><input type="email" id="developer-settings-email" value="<?php echo htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8'); ?>" readonly></div>
-                    </div>
                     <section class="password-panel" aria-labelledby="developer-password-title">
                         <div class="password-panel-heading"><div><p class="eyebrow">SECURITY</p><h3 id="developer-password-title">Change password</h3><p>Use at least 8 characters. Your current password is required to save a new one.</p></div></div>
                         <form class="password-form" action="../backend/profile-actions.php" method="POST">

@@ -62,7 +62,11 @@ unset(
 $projects = [];
 $bidsByProject = [];
 $projectCount = 0;
-$pendingBidCount = 0;
+$projectStatusCounts = ['Open' => 0, 'In Progress' => 0, 'Completed' => 0];
+$selectedProjectStatus = $_GET['status'] ?? '';
+if (!is_string($selectedProjectStatus) || !array_key_exists($selectedProjectStatus, $projectStatusCounts)) {
+    $selectedProjectStatus = '';
+}
 $developers = [];
 $completedProjectsByDeveloper = [];
 $selectedDeveloper = null;
@@ -93,15 +97,23 @@ if (in_array($page, ['dashboard', 'projects'], true)) {
     }
     $projectCount = count($projects);
 
-    $pendingQuery = $conn->prepare(
-        "SELECT COUNT(*) AS pending_count
-         FROM bids
-         INNER JOIN projects ON projects.project_id = bids.project_id
-         WHERE projects.client_email = ? AND bids.status = 'pending'"
-    );
-    $pendingQuery->bind_param('s', $email);
-    $pendingQuery->execute();
-    $pendingBidCount = (int) $pendingQuery->get_result()->fetch_assoc()['pending_count'];
+    foreach ($projects as $project) {
+        $status = strtolower(trim($project['status'] ?? ''));
+        if ($status === 'open') {
+            $projectStatusCounts['Open']++;
+        } elseif ($status === 'in progress') {
+            $projectStatusCounts['In Progress']++;
+        } elseif ($status === 'completed') {
+            $projectStatusCounts['Completed']++;
+        }
+    }
+
+    if ($page === 'projects' && $selectedProjectStatus !== '') {
+        $projects = array_values(array_filter(
+            $projects,
+            static fn (array $project): bool => strcasecmp($project['status'] ?? '', $selectedProjectStatus) === 0
+        ));
+    }
 
     if ($page === 'projects') {
         $bidQuery = $conn->prepare(
@@ -135,12 +147,9 @@ if ($page === 'developers') {
         $developerQuery = $conn->prepare(
             "SELECT id, username, profile_image, about_me, skills, course, year_level,
                     portfolio_url, facebook_url, instagram_url,
-                    (SELECT COUNT(DISTINCT projects.project_id)
-                     FROM bids
-                     INNER JOIN projects ON projects.project_id = bids.project_id
-                     WHERE bids.developer_email = users.email
-                       AND bids.status = 'accepted'
-                       AND projects.status = 'Completed') AS completed_project_count
+                    (SELECT COUNT(DISTINCT project_id)
+                     FROM developer_project_history
+                     WHERE developer_id = users.id) AS completed_project_count
              FROM users
              WHERE id = ? AND role = 'Developer'
                AND (NULLIF(TRIM(facebook_url), '') IS NOT NULL OR NULLIF(TRIM(instagram_url), '') IS NOT NULL)
@@ -152,15 +161,10 @@ if ($page === 'developers') {
 
         if ($selectedDeveloper) {
             $completedProjectsQuery = $conn->prepare(
-                "SELECT DISTINCT projects.title, projects.category, projects.description
-                 FROM bids
-                 INNER JOIN projects ON projects.project_id = bids.project_id
-                 WHERE bids.developer_email = (
-                     SELECT email FROM users WHERE id = ? AND role = 'Developer'
-                 )
-                   AND bids.status = 'accepted'
-                   AND projects.status = 'Completed'
-                 ORDER BY projects.project_id DESC"
+                "SELECT title, category, description
+                 FROM developer_project_history
+                 WHERE developer_id = ?
+                 ORDER BY completed_at DESC, history_id DESC"
             );
             $completedProjectsQuery->bind_param('i', $developerId);
             $completedProjectsQuery->execute();
@@ -172,12 +176,9 @@ if ($page === 'developers') {
         $developerQuery = $conn->prepare(
             "SELECT id, username, profile_image, about_me, skills, course, year_level,
                     portfolio_url, facebook_url, instagram_url,
-                    (SELECT COUNT(DISTINCT projects.project_id)
-                     FROM bids
-                     INNER JOIN projects ON projects.project_id = bids.project_id
-                     WHERE bids.developer_email = users.email
-                       AND bids.status = 'accepted'
-                       AND projects.status = 'Completed') AS completed_project_count
+                    (SELECT COUNT(DISTINCT project_id)
+                     FROM developer_project_history
+                     WHERE developer_id = users.id) AS completed_project_count
              FROM users
              WHERE role = 'Developer'
                AND (NULLIF(TRIM(facebook_url), '') IS NOT NULL OR NULLIF(TRIM(instagram_url), '') IS NOT NULL)
@@ -198,13 +199,12 @@ if ($page === 'developers') {
 
         if ($developers) {
             $completedProfilesQuery = $conn->prepare(
-                "SELECT users.id AS developer_id, projects.title, projects.category, projects.description
+                "SELECT users.id AS developer_id, history.title, history.category, history.description
                  FROM users
-                 INNER JOIN bids ON bids.developer_email = users.email AND bids.status = 'accepted'
-                 INNER JOIN projects ON projects.project_id = bids.project_id AND projects.status = 'Completed'
+                 INNER JOIN developer_project_history AS history ON history.developer_id = users.id
                  WHERE users.role = 'Developer'
                    AND (NULLIF(TRIM(users.facebook_url), '') IS NOT NULL OR NULLIF(TRIM(users.instagram_url), '') IS NOT NULL)
-                 ORDER BY projects.project_id DESC"
+                 ORDER BY history.completed_at DESC, history.history_id DESC"
             );
             $completedProfilesQuery->execute();
             $completedProfileResult = $completedProfilesQuery->get_result();
@@ -242,6 +242,10 @@ if ($page === 'developers') {
 
         <div class="workspace">
             <nav class="navbar" aria-label="Workspace navigation">
+                <a class="mobile-navbar-brand logo-group" href="Client.php" aria-label="AUProject client dashboard">
+                    <span class="logo-box" aria-hidden="true">AUP</span>
+                    <span class="logo-name">AUProject</span>
+                </a>
                 <span class="navbar-label">Client workspace</span>
                 <div class="account-menu" data-account-menu>
                     <button class="account-menu-toggle" type="button" aria-label="Open profile and logout menu" aria-expanded="false" aria-controls="client-account-dropdown" data-menu-toggle>
@@ -265,14 +269,14 @@ if ($page === 'developers') {
                     <h1>Welcome, <?php echo htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8'); ?>!</h1>
                     <p class="page-description">Track your projects and review developer proposals.</p>
                     <div class="main-boxes">
-                        <section class="first-box">
+                        <a class="first-box developer-stat-link" href="Client.php?page=projects&amp;status=In%20Progress">
                             <h2>Active Projects</h2>
-                            <p><?php echo $projectCount; ?></p>
-                        </section>
-                        <section class="first-box1">
-                            <h2>Pending Bids</h2>
-                            <p><?php echo $pendingBidCount; ?></p>
-                        </section>
+                            <p><?php echo $projectStatusCounts['In Progress']; ?></p>
+                        </a>
+                        <a class="first-box1 developer-stat-link" href="Client.php?page=projects&amp;status=Open">
+                            <h2>Pending Projects</h2>
+                            <p><?php echo $projectStatusCounts['Open']; ?></p>
+                        </a>
                     </div>
 
                     <section class="Second-box">
@@ -368,12 +372,23 @@ if ($page === 'developers') {
                         </div>
                         <a class="button button-primary" href="Client.php?page=post-project">Post a project</a>
                     </header>
+                    <nav class="project-status-filters" aria-label="Filter projects by status">
+                        <a href="Client.php?page=projects" <?php echo $selectedProjectStatus === '' ? 'aria-current="page"' : ''; ?>>All <span><?php echo $projectCount; ?></span></a>
+                        <a href="Client.php?page=projects&amp;status=Open" <?php echo $selectedProjectStatus === 'Open' ? 'aria-current="page"' : ''; ?>>Pending <span><?php echo $projectStatusCounts['Open']; ?></span></a>
+                        <a href="Client.php?page=projects&amp;status=In%20Progress" <?php echo $selectedProjectStatus === 'In Progress' ? 'aria-current="page"' : ''; ?>>Active <span><?php echo $projectStatusCounts['In Progress']; ?></span></a>
+                        <a href="Client.php?page=projects&amp;status=Completed" <?php echo $selectedProjectStatus === 'Completed' ? 'aria-current="page"' : ''; ?>>Completed <span><?php echo $projectStatusCounts['Completed']; ?></span></a>
+                    </nav>
                     <?php if ($projectError !== ''): ?><p class="error" role="alert"><?php echo htmlspecialchars($projectError, ENT_QUOTES, 'UTF-8'); ?></p><?php endif; ?>
                     <?php if ($projectSuccess !== ''): ?><p class="success" role="status"><?php echo htmlspecialchars($projectSuccess, ENT_QUOTES, 'UTF-8'); ?></p><?php endif; ?>
-                    <?php if ($projectCount === 0): ?>
+                    <?php if (!$projects): ?>
                         <section class="empty-state"><span class="empty-state-icon" aria-hidden="true">+</span>
-                            <h2>No projects yet</h2>
-                            <p>Post your first project to start receiving proposals from developers.</p><a class="button button-primary" href="Client.php?page=post-project">Create your first project</a>
+                            <h2><?php echo $selectedProjectStatus !== '' ? 'No ' . strtolower($selectedProjectStatus) . ' projects' : 'No projects yet'; ?></h2>
+                            <p><?php echo $selectedProjectStatus !== '' ? 'Projects with this status will appear here.' : 'Post your first project to start receiving proposals from developers.'; ?></p>
+                            <?php if ($selectedProjectStatus !== ''): ?>
+                                <a class="button button-secondary" href="Client.php?page=projects">View all projects</a>
+                            <?php else: ?>
+                                <a class="button button-primary" href="Client.php?page=post-project">Create your first project</a>
+                            <?php endif; ?>
                         </section>
                     <?php else: ?>
                         <div class="project-list">
@@ -392,6 +407,11 @@ if ($page === 'developers') {
                                         </div>
                                         <div class="project-head-actions">
                                             <button class="status-badge status-badge-trigger status-<?php echo htmlspecialchars(strtolower(str_replace(' ', '-', $projectStatus)), ENT_QUOTES, 'UTF-8'); ?>" type="button" data-open-dialog="client-project-status-<?php echo $projectId; ?>"><?php echo htmlspecialchars($projectStatus, ENT_QUOTES, 'UTF-8'); ?></button>
+                                            <?php if (strtolower($projectStatus) === 'in progress'): ?>
+                                                <button class="button button-accept project-complete-trigger" type="button" data-open-dialog="client-project-status-<?php echo $projectId; ?>">
+                                                    <span aria-hidden="true">&#10003;</span>
+                                                </button>
+                                            <?php endif; ?>
                                             <form action="../backend/client-project-actions.php" method="POST" onsubmit="return confirm('Delete this project?');">
                                                 <input type="hidden" name="action" value="delete"><input type="hidden" name="project_id" value="<?php echo $projectId; ?>">
                                                 <button class="icon-button" type="submit" name="delete" aria-label="Delete project"><span aria-hidden="true">&#128465;</span></button>
@@ -503,7 +523,6 @@ if ($page === 'developers') {
                                                                         <?php if (empty($bid['portfolio_url']) && empty($bid['facebook_url']) && empty($bid['instagram_url'])): ?><span class="muted-text">No contact links shared.</span><?php endif; ?>
                                                                     </div>
                                                                 </div>
-                                                                <p class="contact-access-note">Use these shared links to coordinate with the developer on your accepted project.</p>
                                                             </section>
                                                         <?php endif; ?>
                                                     </article>
@@ -629,21 +648,35 @@ if ($page === 'developers') {
                         <?php else: ?>
                             <?php foreach ($developers as $developer): ?>
                                 <article class="dev-card">
-                                    <div class="developer-identity">
+                                    <div class="developer-card-avatar">
                                         <?php if (!empty($developer['profile_image'])): ?>
                                             <img class="account-avatar" src="../backend/profile-actions.php?action=profile_image&amp;user_id=<?php echo (int) $developer['id']; ?>" alt="">
                                         <?php else: ?>
                                             <span class="account-avatar account-avatar-fallback" aria-hidden="true"><?php echo htmlspecialchars(strtoupper(substr($developer['username'] ?: 'D', 0, 1)), ENT_QUOTES, 'UTF-8'); ?></span>
                                         <?php endif; ?>
-                                        <div>
-                                            <h3><?php echo htmlspecialchars($developer['username'], ENT_QUOTES, 'UTF-8'); ?></h3>
-                                            <p><?php echo htmlspecialchars((($developer['course'] ?? '') ?: 'BSIT') . ' • ' . (($developer['year_level'] ?? '') ?: '2nd Year'), ENT_QUOTES, 'UTF-8'); ?></p>
-                                        </div>
                                     </div>
-                                    <p class="developer-card-about"><?php echo htmlspecialchars($developer['about_me'] ?: 'This developer has not added an introduction yet.', ENT_QUOTES, 'UTF-8'); ?></p>
-                                    <div class="developer-card-meta"><strong><?php echo (int) $developer['completed_project_count']; ?></strong><span>completed projects</span></div>
-                                    <div class="dev-links">
-                                        <button class="button button-secondary" type="button" data-open-dialog="client-developer-profile-<?php echo (int) $developer['id']; ?>">View profile</button>
+                                    <div class="developer-card-content">
+                                        <header class="developer-card-heading">
+                                            <div class="developer-identity">
+                                                <div>
+                                                    <h3><?php echo htmlspecialchars($developer['username'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                                                    <p><?php echo htmlspecialchars((($developer['course'] ?? '') ?: 'BSIT') . ' • ' . (($developer['year_level'] ?? '') ?: '2nd Year'), ENT_QUOTES, 'UTF-8'); ?></p>
+                                                </div>
+                                            </div>
+                                            <div class="dev-links">
+                                                <button class="button button-secondary developer-card-cta" type="button" data-open-dialog="client-developer-profile-<?php echo (int) $developer['id']; ?>">View profile</button>
+                                            </div>
+                                        </header>
+                                        <div class="developer-card-meta"><strong><?php echo (int) $developer['completed_project_count']; ?></strong><span>completed projects</span></div>
+                                        <?php $cardSkills = array_values(array_filter(array_map('trim', explode(',', $developer['skills'] ?? '')))); ?>
+                                        <div class="developer-card-skills">
+                                            <?php foreach (array_slice($cardSkills, 0, 4) as $skill): ?>
+                                                <span class="skill-chip"><?php echo htmlspecialchars($skill, ENT_QUOTES, 'UTF-8'); ?></span>
+                                            <?php endforeach; ?>
+                                            <?php if (count($cardSkills) > 4): ?><span class="skill-chip">+<?php echo count($cardSkills) - 4; ?></span><?php endif; ?>
+                                            <?php if (!$cardSkills): ?><span class="muted-text">No skills listed yet.</span><?php endif; ?>
+                                        </div>
+                                        <p class="developer-card-about"><?php echo htmlspecialchars($developer['about_me'] ?: 'This developer has not added an introduction yet.', ENT_QUOTES, 'UTF-8'); ?></p>
                                     </div>
                                 </article>
                                 <?php $profileProjects = $completedProjectsByDeveloper[(int) $developer['id']] ?? []; ?>
@@ -706,16 +739,6 @@ if ($page === 'developers') {
             <dialog class="client-profile-modal" aria-labelledby="client-profile-title" data-client-profile-modal>
                 <header class="profile-card-heading">
                     <div class="profile-summary">
-                        <?php if ($profileImage): ?>
-                            <img class="profile-avatar profile-avatar-large" src="../backend/profile-actions.php?action=profile_image" alt="Profile picture">
-                        <?php else: ?>
-                            <span class="profile-avatar profile-avatar-large profile-avatar-fallback" aria-hidden="true"><?php echo htmlspecialchars($initial, ENT_QUOTES, 'UTF-8'); ?></span>
-                        <?php endif; ?>
-                        <div>
-                            <h2 id="client-profile-title"><?php echo htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8'); ?></h2>
-                            <p><?php echo htmlspecialchars($user['role'], ENT_QUOTES, 'UTF-8'); ?> · AUProject</p>
-                        </div>
-
                         <button class="profile-modal-close1" type="button" aria-label="Close profile" data-close-client-profile>&times;</button>
                     </div>
                 </header>
@@ -759,13 +782,12 @@ if ($page === 'developers') {
                             <?php if (!empty($user['facebook_url'])): ?><a class="profile-link-value" href="<?php echo htmlspecialchars($user['facebook_url'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer" data-link-value><?php echo htmlspecialchars($user['facebook_url'], ENT_QUOTES, 'UTF-8'); ?></a><?php else: ?><span class="profile-link-value profile-link-empty" data-link-value>No Facebook link added</span><?php endif; ?>
                             <input class="profile-link-input" type="url" id="client-facebook" name="facebook_url" placeholder="https://facebook.com/username" value="<?php echo htmlspecialchars($user['facebook_url'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" hidden>
                         </div>
+                        <button class="button button-primary" type="submit">Save changes</button>
                         <div class="profile-field">
                             <div class="profile-field-heading"><label for="client-instagram">Instagram link <span>Optional if Facebook is set</span></label><button class="profile-field-edit" type="button" data-toggle-link-editor aria-controls="client-instagram" aria-expanded="false" aria-label="Edit Instagram link"><svg aria-hidden="true" viewBox="0 0 16 16"><path d="M11.6 1.4a1.4 1.4 0 0 1 2 2L5.1 11.9l-3 .8.8-3z"></path><path d="M9.9 3.1l3 3"></path></svg></button></div>
                             <?php if (!empty($user['instagram_url'])): ?><a class="profile-link-value" href="<?php echo htmlspecialchars($user['instagram_url'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer" data-link-value><?php echo htmlspecialchars($user['instagram_url'], ENT_QUOTES, 'UTF-8'); ?></a><?php else: ?><span class="profile-link-value profile-link-empty" data-link-value>No Instagram link added</span><?php endif; ?>
                             <input class="profile-link-input" type="url" id="client-instagram" name="instagram_url" placeholder="https://instagram.com/username" value="<?php echo htmlspecialchars($user['instagram_url'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" hidden>
                         </div>
-                        <p class="profile-field-full social-link-note">Add at least one Facebook or Instagram link before posting projects.</p>
-                        <button class="button button-primary" type="submit">Save changes</button>
                     </form>
                     <section class="password-panel" aria-labelledby="client-password-title">
                         <div class="password-panel-heading"><h3 id="client-password-title">Change password</h3></div>

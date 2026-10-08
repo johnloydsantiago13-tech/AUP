@@ -7,9 +7,8 @@ return [
         'Desktop Software',
         'UI/UX Design',
         'Database Management',
+        'Arduino',
         'Game Development',
-        'Cybersecurity',
-        'IT Support',
         'Other',
     ],
     'year_levels' => [
@@ -26,9 +25,8 @@ return [
         'Java',
         'Python',
         'React',
+        'Arduino',
         'UI/UX Design',
-        'Cybersecurity',
-        'IT Support',
     ],
     'courses' => [
         'BSIT',

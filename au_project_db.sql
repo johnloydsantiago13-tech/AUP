@@ -79,6 +79,23 @@ CREATE TABLE `bids` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Table structure for table `developer_project_history`
+--
+
+CREATE TABLE `developer_project_history` (
+  `history_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_id` int(11) NOT NULL,
+  `developer_id` int(10) UNSIGNED NOT NULL,
+  `title` varchar(150) NOT NULL,
+  `category` varchar(100) NOT NULL,
+  `description` text NOT NULL,
+  `completed_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`history_id`),
+  UNIQUE KEY `project_developer` (`project_id`, `developer_id`),
+  KEY `developer_id` (`developer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
 -- Table structure for table `ys`, used by developer registration
 --
 

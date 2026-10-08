@@ -28,20 +28,85 @@ if (!$ownedProject) {
 }
 
 if ($action === 'complete') {
-    if (strtolower($ownedProject['status']) !== 'in progress') {
-        $_SESSION['project_error'] = 'Only an active project can be marked complete.';
-    } else {
+    $transactionStarted = false;
+    try {
+        $lockProject = $conn->prepare(
+            'SELECT status FROM projects WHERE project_id = ? AND client_email = ? LIMIT 1 FOR UPDATE'
+        );
+        $acceptedDeveloper = $conn->prepare(
+            "SELECT users.id
+             FROM bids
+             INNER JOIN users ON users.email = bids.developer_email AND users.role = 'Developer'
+             WHERE bids.project_id = ? AND bids.status = 'accepted'
+             LIMIT 1"
+        );
         $complete = $conn->prepare(
             "UPDATE projects SET status = 'Completed'
              WHERE project_id = ? AND client_email = ? AND status = 'In Progress'"
         );
-        $complete->bind_param('is', $projectId, $clientEmail);
+        $saveHistory = $conn->prepare(
+            "INSERT INTO developer_project_history
+                (project_id, developer_id, title, category, description)
+             SELECT projects.project_id, users.id, projects.title, projects.category, projects.description
+             FROM projects
+             INNER JOIN bids ON bids.project_id = projects.project_id AND bids.status = 'accepted'
+             INNER JOIN users ON users.email = bids.developer_email AND users.role = 'Developer'
+             WHERE projects.project_id = ?
+             ON DUPLICATE KEY UPDATE
+                title = VALUES(title),
+                category = VALUES(category),
+                description = VALUES(description)"
+        );
 
-        if ($complete->execute() && $complete->affected_rows === 1) {
-            $_SESSION['project_success'] = 'Project marked as completed.';
-        } else {
-            $_SESSION['project_error'] = 'The project could not be marked complete.';
+        if (!$lockProject || !$acceptedDeveloper || !$complete || !$saveHistory) {
+            throw new RuntimeException('Could not prepare project completion statements.');
         }
+
+        $conn->begin_transaction();
+        $transactionStarted = true;
+
+        $lockProject->bind_param('is', $projectId, $clientEmail);
+        if (!$lockProject->execute()) {
+            throw new RuntimeException('Could not load owned project.');
+        }
+        $lockedProject = $lockProject->get_result()->fetch_assoc();
+        if (!$lockedProject) {
+            throw new RuntimeException('Project not found or no longer owned.');
+        }
+        if (strtolower($lockedProject['status']) !== 'in progress') {
+            throw new RuntimeException('Only an active project can be marked complete.');
+        }
+
+        $acceptedDeveloper->bind_param('i', $projectId);
+        if (!$acceptedDeveloper->execute() || !$acceptedDeveloper->get_result()->fetch_assoc()) {
+            throw new RuntimeException('No accepted developer was found for the completed project.');
+        }
+
+        $complete->bind_param('is', $projectId, $clientEmail);
+        if (!$complete->execute() || $complete->affected_rows !== 1) {
+            throw new RuntimeException('The project could not be marked complete.');
+        }
+
+        $saveHistory->bind_param('i', $projectId);
+        if (!$saveHistory->execute()) {
+            throw new RuntimeException('Could not save completed project history.');
+        }
+
+        $conn->commit();
+        $transactionStarted = false;
+        $_SESSION['project_success'] = 'Project marked as completed.';
+    } catch (RuntimeException $error) {
+        if ($transactionStarted) {
+            try {
+                $conn->rollback();
+            } catch (mysqli_sql_exception $rollbackError) {
+                error_log('Project completion rollback failed: ' . $rollbackError->getMessage());
+            }
+        }
+        error_log('Project completion failed: ' . $error->getMessage());
+        $_SESSION['project_error'] = $error instanceof mysqli_sql_exception
+            ? 'The project could not be marked complete. No changes were made.'
+            : $error->getMessage();
     }
 
     header('Location: ../frontend/Client.php?page=projects');
