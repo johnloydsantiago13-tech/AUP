@@ -7,8 +7,8 @@ if (isset($_POST['register'])) {
     $email = $_POST['email'];
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $role = ($_POST['Role'] === 'Developer') ? 'Developer' : 'Client';
-    $year = preg_replace('/\s+/','',$_POST['year']);
-    $section = preg_replace('/\s+/','',$_POST['section']);
+    $year = strtoupper(preg_replace('/[\s\p{Z}]+/u', '', trim($_POST['year'])));
+    $section = strtoupper(preg_replace('/[\s\p{Z}]+/u', '', trim($_POST['section'])));
 
     $checkEmailQ = $conn->prepare("SELECT email FROM users WHERE email = ?");
     $checkEmailQ->bind_param('s', $email);
@@ -33,22 +33,18 @@ if (isset($_POST['register'])) {
                 $_SESSION['reg_error'] = "Username cannot contain any special characters.";
                 $_SESSION['active_form'] = 'register';
             }
-            else if ($_POST['password'] !== $_POST['cpassword']) {
-                $_SESSION['pass_error'] = 'Password do not match.';
-                $_SESSION['active_form'] = 'register';
-
-            } elseif (strlen($_POST['password']) < 8) {
+            else if (strlen($_POST['password']) < 8) {
                 $_SESSION['pass_error'] = 'Password must be 8 or more characters.';
                 $_SESSION['active_form'] = 'register';
 
 
             } elseif ($_POST['Role'] === 'Developer') {
-    $checkyear = $conn->prepare("SELECT * FROM ys WHERE year = ?");
+    $checkyear = $conn->prepare("SELECT 1 FROM ys WHERE UPPER(REPLACE(TRIM(`Year`), ' ', '')) = ?");
     $checkyear->bind_param('s', $year);
     $checkyear->execute();
     $checkyear->store_result();
 
-    $checksection = $conn->prepare("SELECT * FROM ys WHERE section = ?");
+    $checksection = $conn->prepare("SELECT 1 FROM ys WHERE UPPER(REPLACE(TRIM(`Section`), ' ', '')) = ?");
     $checksection->bind_param('s', $section);
     $checksection->execute();
     $checksection->store_result();

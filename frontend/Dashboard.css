@@ -368,13 +368,14 @@ h4 {
 
 .button-secondary {
   border-color: #d8dce2;
-  background: #fff;
-  color: #454b55;
+  background: var(--red-soft);
+  color: var(--red);
 }
 
 .button-secondary:hover {
   border-color: #aeb5bf;
-  background: var(--surface-soft);
+  background: var(--red);
+  color: var(--red-soft);
 }
 
 .error,

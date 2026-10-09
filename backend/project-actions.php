@@ -97,6 +97,6 @@ if (isset($_POST['create_project'])) {
     }
 }
 
-header('Location: ../frontend/Client.php?page=post-project');
+header('Location: ../frontend/Client.php?page=projects');
 exit();
 ?>
