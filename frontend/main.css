@@ -238,14 +238,15 @@ body {
   margin-bottom: 12px;
 }
 
-.form-heading h2 {
+.form-heading h1 {
   margin: 0;
   color: var(--ink);
   font-family: "Manrope", sans-serif;
-  font-size: clamp(25px, 3vw, 31px);
+  font-size: clamp(25px, 3vw, 45px);
   font-weight: 700;
   letter-spacing: -0.045em;
   line-height: 1.25;
+  justify-self: center;
 }
 
 .form-heading p {
@@ -443,12 +444,11 @@ a:focus-visible {
   }
 }
 
-/* Additional login and registration polish. */
 .auth-layout {
   position: relative;
   isolation: isolate;
   gap: clamp(14px, 2vw, 28px);
-  padding: clamp(16px, 3.5vw, 48px);
+  padding: clamp(16px, 3.5vw, 30px);
   border: 1px solid rgba(49, 88, 201, 0.1);
   background:
     radial-gradient(ellipse at 8% 4%, rgba(115, 148, 255, 0.1), transparent 34%),

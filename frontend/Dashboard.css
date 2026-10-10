@@ -362,20 +362,27 @@ h4 {
   color: #fff;
 }
 
-.button-accept:hover {
-  background: #0f8645;
-}
-
 .button-secondary {
   border-color: #d8dce2;
-  background: var(--red-soft);
-  color: var(--red);
+  background: #fff;
+  color: #454b55;
 }
 
 .button-secondary:hover {
   border-color: #aeb5bf;
-  background: var(--red);
-  color: var(--red-soft);
+  background: var(--surface-soft);
+}
+
+.reject-bid-button {
+  border-color: #d64545;
+  background: #d64545;
+  color: #fff;
+}
+
+.reject-bid-button:hover {
+  border-color: #b83232;
+  background: #b83232;
+  color: #fff;
 }
 
 .error,
@@ -1016,7 +1023,7 @@ h4 {
 }
 
 .action-dialog {
-  width: min(620px, calc(100% - 32px));
+  width: min(550px, calc(100% - 32px));
   max-width: none;
   max-height: min(88vh, 760px);
   padding: 0;
@@ -1142,6 +1149,7 @@ h4 {
   font-size: 28px;
   line-height: 1;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .profile-modal-close:hover,
@@ -1269,6 +1277,7 @@ h4 {
 
 .text-button-danger {
   color: var(--red);
+  background: var(--surface-soft);
 }
 
 .text-button-danger:hover {
@@ -1391,7 +1400,7 @@ h4 {
   background: #fff;
   color: var(--ink);
   font: inherit;
-  resize: vertical;
+  resize: none;
 }
 
 .profile-field input[readonly] {
@@ -1502,7 +1511,7 @@ h4 {
 
 .developer-profile-form textarea {
   min-height: 120px;
-  resize: vertical;
+  resize: none;
 }
 
 .project-filter-actions {
@@ -1561,50 +1570,86 @@ h4 {
 }
 
 .skill-options-field {
+  display: grid;
   min-width: 0;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px 12px;
   margin: 0;
   padding: 0;
   border: 0;
 }
 
 .skill-options-field legend {
-  margin-bottom: 9px;
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  margin: 0;
   color: #59616d;
   font-size: 13px;
   font-weight: 700;
 }
 
-.skill-option-list {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.skill-picker-controls {
+  display: flex;
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: start;
+  min-width: 0;
   gap: 8px;
 }
 
-.skill-option {
-  display: flex;
-  min-height: 42px;
-  align-items: center;
-  gap: 9px;
+.skill-picker-controls select {
+  width: min(260px, 52vw);
+  min-height: 40px;
   padding: 8px 10px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  border: 1px solid #dce3eb;
+  border-radius: 9px;
   background: #fff;
   color: var(--ink);
-  cursor: pointer;
+  font: inherit;
+}
+
+.skill-picker-controls .button {
+  min-height: 40px;
+  padding: 8px 14px;
+}
+
+.selected-skill-list:empty::before {
+  color: var(--muted);
+  content: "No skills selected yet.";
   font-size: 13px;
 }
 
-.skill-option:has(input:checked) {
-  border-color: #b7d5ee;
-  background: var(--blue-soft);
+.skill-options-field .selected-skill-list {
+  grid-column: 1 / -1;
+  min-height: 24px;
 }
 
-.skill-option input {
-  width: 16px;
-  min-height: auto;
-  height: 16px;
-  margin: 0;
-  accent-color: var(--blue);
+.selected-skill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.selected-skill-remove {
+  display: inline-grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+}
+
+.selected-skill-remove:hover,
+.selected-skill-remove:focus-visible {
+  background: rgba(36, 105, 168, 0.12);
+  outline: none;
 }
 
 .social-link-note {
@@ -1720,76 +1765,12 @@ h4 {
   grid-column: 1 / -1;
 }
 
-.developer-profile-page-heading {
-  align-items: flex-end;
-}
-
-.developer-profile-workspace {
-  display: grid;
-  width: min(100%, 1180px);
-  gap: 22px;
-  margin: 0 auto;
-}
-
-.developer-profile-editor {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-}
-
-.developer-profile-editor > .developer-public-heading {
-  min-height: 112px;
-  margin: 0;
-  padding: 24px clamp(20px, 3vw, 34px);
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
-}
-
-.developer-profile-editor > .developer-public-heading .profile-avatar-large {
-  width: 72px;
-  height: 72px;
-  flex: 0 0 72px;
-  border: 3px solid #fff;
-  box-shadow: 0 5px 14px rgba(36, 105, 168, 0.14);
-}
-
-.developer-profile-editor > .developer-public-heading h2 {
-  margin: 0 0 5px;
-  color: var(--ink);
-  font-size: 22px;
-}
-
-.developer-profile-editor > .developer-public-heading p {
-  margin: 0;
-}
-
-.developer-profile-editor > .developer-public-heading .developer-card-meta {
-  flex: 0 0 auto;
-  padding: 10px 14px;
-  border: 1px solid #d7e7f4;
-  border-radius: 12px;
-  background: #fff;
-}
-
-.developer-profile-body {
-  display: grid;
-  grid-template-columns: minmax(240px, 0.68fr) minmax(0, 1.7fr);
-  align-items: start;
-  gap: 22px;
-  padding: clamp(18px, 3vw, 30px);
-}
-
 .developer-profile-photo-panel {
   display: flex;
   min-height: 100%;
   align-items: center;
   flex-direction: column;
-  justify-content: center;
+  justify-content: start;
   gap: 16px;
   padding: 24px 20px;
   border-color: #e4eaf1;
@@ -1813,7 +1794,7 @@ h4 {
 }
 
 .developer-profile-photo-panel .profile-photo-actions {
-  justify-content: center;
+  justify-content: start;
   gap: 10px;
 }
 
@@ -1857,20 +1838,6 @@ h4 {
 .developer-profile-form textarea {
   min-height: 132px;
   line-height: 1.55;
-}
-
-.developer-profile-form .skill-option-list {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.developer-profile-form .skill-option {
-  min-height: 44px;
-  border-color: #e3e8ee;
-  transition: border-color 140ms ease, background-color 140ms ease;
-}
-
-.developer-profile-form .skill-option:hover {
-  border-color: #b7d5ee;
 }
 
 .developer-profile-form .social-link-note {
@@ -1979,9 +1946,11 @@ h4 {
 }
 
 .developer-profile-modal {
-  width: min(1000px, calc(100vw - 48px));
+  width: min(1000px, calc(100vw - 32px));
   max-height: min(88vh, 860px);
-  scrollbar-gutter: stable;
+  max-height: min(88dvh, 860px);
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .developer-profile-modal .developer-settings-modal-heading {
@@ -2007,10 +1976,13 @@ h4 {
 }
 
 .developer-profile-modal .developer-settings-card {
-  padding: clamp(18px, 3vw, 30px);
+  width: 100%;
+  min-width: 0;
+  max-width: none;
   grid-template-columns: minmax(230px, 0.72fr) minmax(0, 1.65fr);
   align-items: start;
   gap: clamp(16px, 2.2vw, 24px);
+  padding: clamp(18px, 3vw, 30px);
 }
 
 .developer-profile-modal .developer-profile-photo-panel {
@@ -2089,12 +2061,6 @@ h4 {
 }
 
 @media (max-width: 900px) {
-  .developer-profile-body {
-    grid-template-columns: minmax(190px, 0.65fr) minmax(0, 1.35fr);
-    gap: 16px;
-    padding: 18px;
-  }
-
   .developer-profile-form {
     gap: 13px;
     padding: 17px;
@@ -2107,12 +2073,25 @@ h4 {
 }
 
 @media (max-width: 700px) {
-  .developer-profile-page-heading {
-    align-items: flex-start;
+  .skill-options-field {
+    grid-template-columns: 1fr;
   }
 
-  .developer-profile-body {
-    grid-template-columns: 1fr;
+  .skill-options-field legend,
+  .skill-picker-controls {
+    grid-column: 1;
+  }
+
+  .skill-options-field legend {
+    grid-row: 1;
+  }
+
+  .skill-picker-controls {
+    grid-row: 2;
+  }
+
+  .skill-options-field .selected-skill-list {
+    grid-row: 3;
   }
 
   .developer-profile-photo-panel {
@@ -2142,10 +2121,6 @@ h4 {
   .developer-profile-form .profile-field-full,
   .developer-profile-form .social-link-note {
     grid-column: 1;
-  }
-
-  .developer-profile-form .skill-option-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .developer-settings-card .password-form {
@@ -2181,21 +2156,6 @@ h4 {
 }
 
 @media (max-width: 480px) {
-  .developer-profile-editor > .developer-public-heading {
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 13px;
-    padding: 18px;
-  }
-
-  .developer-profile-editor > .developer-public-heading .developer-card-meta {
-    margin-left: 84px;
-  }
-
-  .developer-profile-body {
-    padding: 12px;
-  }
-
   .developer-profile-form,
   .developer-settings-card .password-panel,
   .developer-settings-email {
@@ -2219,10 +2179,6 @@ h4 {
   .developer-settings-message {
     margin-right: 16px;
     margin-left: 16px;
-  }
-
-  .developer-profile-form .skill-option-list {
-    grid-template-columns: 1fr;
   }
 
   .developer-profile-form > .button,
@@ -2490,7 +2446,7 @@ h4 {
 
 .probox textarea {
   min-height: 130px;
-  resize: vertical;
+  resize: none;
 }
 
 .probox #button2 {
@@ -2728,8 +2684,7 @@ h4 {
 
   .developer-dashboard .main-boxes,
   .project-filter-form,
-  .completed-project-list,
-  .skill-option-list {
+  .completed-project-list {
     grid-template-columns: 1fr;
   }
 
@@ -2786,7 +2741,6 @@ h4 {
     width: 100%;
   }
 
-  .developer-profile-body > .profile-photo-panel,
   .developer-profile-form {
     grid-column: 1;
     grid-row: auto;
@@ -2798,17 +2752,5 @@ h4 {
 
   .public-profile-section {
     padding: 15px;
-  }
-}
-
-@media (max-width: 560px) {
-  .developer-profile-editor {
-    padding: 0;
-  }
-
-  .developer-profile-editor > .developer-public-heading {
-    align-items: center;
-    flex-direction: row;
-    flex-wrap: wrap;
   }
 }

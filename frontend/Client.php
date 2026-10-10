@@ -259,7 +259,7 @@ if ($page === 'developers') {
                     </button>
                     <div class="account-dropdown" id="client-account-dropdown" data-account-dropdown hidden>
                         <button type="button" data-open-client-profile>Profile</button>
-                        <a href="index.php">Logout</a>
+                        <button type="button" data-open-dialog="client-logout-confirm">Logout</button>
                     </div>
                 </div>
             </nav>
@@ -498,7 +498,20 @@ if ($page === 'developers') {
                                                                         <button class="button button-accept" type="submit">Accept bid</button>
                                                                     </form>
                                                                 </dialog>
-                                                                <form action="../backend/bid-actions.php" method="POST" onsubmit="return confirm('Reject this bid?');"><input type="hidden" name="action" value="reject"><input type="hidden" name="bid_id" value="<?php echo (int) $bid['bid_id']; ?>"><button class="button button-secondary" type="submit">Reject</button></form>
+                                                                <button class="button reject-bid-button" type="button" data-open-dialog="client-reject-bid-<?php echo (int) $bid['bid_id']; ?>">Reject</button>
+                                                                <dialog class="action-dialog" id="client-reject-bid-<?php echo (int) $bid['bid_id']; ?>" aria-labelledby="client-reject-bid-title-<?php echo (int) $bid['bid_id']; ?>" data-action-dialog>
+                                                                    <header class="action-dialog-header">
+                                                                        <div><p class="eyebrow">CONFIRM BID</p><h2 id="client-reject-bid-title-<?php echo (int) $bid['bid_id']; ?>">Reject <?php echo htmlspecialchars($developerName, ENT_QUOTES, 'UTF-8'); ?>'s bid?</h2></div>
+                                                                        <button class="profile-modal-close" type="button" aria-label="Close confirmation" data-close-dialog>&times;</button>
+                                                                    </header>
+                                                                    <div class="action-dialog-body"><p>This will reject the developer's bid for this project.</p></div>
+                                                                    <form class="action-dialog-actions" action="../backend/bid-actions.php" method="POST">
+                                                                        <input type="hidden" name="action" value="reject">
+                                                                        <input type="hidden" name="bid_id" value="<?php echo (int) $bid['bid_id']; ?>">
+                                                                        <button class="button button-secondary" type="button" data-close-dialog>Cancel</button>
+                                                                        <button class="button reject-bid-button" type="submit">Reject bid</button>
+                                                                    </form>
+                                                                </dialog>
                                                             </div>
                                                         <?php endif; ?>
                                                         <?php if (strtolower($bid['status']) === 'accepted'): ?>
@@ -798,6 +811,17 @@ if ($page === 'developers') {
                             <button class="button button-primary" type="submit" name="update_password">Update password</button>
                         </form>
                     </section>
+                </div>
+            </dialog>
+            <dialog class="action-dialog" id="client-logout-confirm" aria-labelledby="client-logout-title" data-action-dialog>
+                <header class="action-dialog-header">
+                    <div><p class="eyebrow">LOG OUT</p><h2 id="client-logout-title">Log out of your account?</h2></div>
+                    <button class="profile-modal-close" type="button" aria-label="Close confirmation" data-close-dialog>&times;</button>
+                </header>
+                <div class="action-dialog-body"><p>You will return to the AUProject home page.</p></div>
+                <div class="action-dialog-actions">
+                    <button class="button button-secondary" type="button" data-close-dialog>Cancel</button>
+                    <a class="button button-primary" href="index.php">Log out</a>
                 </div>
             </dialog>
         </div>

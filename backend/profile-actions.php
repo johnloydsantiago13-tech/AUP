@@ -218,7 +218,11 @@ if (isset($_POST['update_profile'])) {
     elseif (!isSocialUrl($instagramUrl, $instagramHosts)) {
         $_SESSION['profile_error'] = 'The Instagram field must contain an Instagram URL.';
     }
-    elseif ($facebookUrl === '' && $instagramUrl === '') {
+    elseif (
+        $facebookUrl === ''
+        && $instagramUrl === ''
+        && ($_SESSION['role'] ?? '') !== 'Developer'
+    ) {
         $_SESSION['profile_error'] = 'Add at least one social link: Facebook or Instagram.';
     } 
     else {
@@ -237,7 +241,7 @@ if (isset($_POST['update_profile'])) {
                 || !is_array($submittedSkills)
                 || count(array_filter($submittedSkills, 'is_string')) !== count($submittedSkills)
             ) {
-                $_SESSION['profile_error'] = 'Select skills from the provided options.';
+                $_SESSION['profile_error'] = 'Check your skill selections and try again.';
                 header('Location: ../frontend/Developer.php?profile=1');
                 exit();
             }
@@ -245,12 +249,7 @@ if (isset($_POST['update_profile'])) {
             $skills = [];
             foreach ($submittedSkills as $submittedSkill) {
                 $submittedSkill = trim($submittedSkill);
-                if (!in_array($submittedSkill, $projectOptions['skills'], true)) {
-                    $_SESSION['profile_error'] = 'Select skills from the provided options.';
-                    header('Location: ../frontend/Developer.php?profile=1');
-                    exit();
-                }
-                if (!in_array($submittedSkill, $skills, true)) {
+                if ($submittedSkill !== '' && !in_array($submittedSkill, $skills, true)) {
                     $skills[] = $submittedSkill;
                 }
             }

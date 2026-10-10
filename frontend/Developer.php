@@ -213,7 +213,7 @@ $selectedSkills = array_filter(array_map('trim', explode(',', $skills)));
                     <div class="account-dropdown" id="developer-account-dropdown" data-account-dropdown hidden>
                         <button type="button" data-open-developer-profile>Profile</button>
                         <button type="button" data-open-developer-settings>Settings</button>
-                        <a href="index.php">Logout</a>
+                        <button type="button" data-open-dialog="developer-logout-confirm">Logout</button>
                     </div>
                 </div>
             </nav>
@@ -608,74 +608,11 @@ $selectedSkills = array_filter(array_map('trim', explode(',', $skills)));
                         </div>
                     <?php endif; ?>
 
-                <?php elseif ($page === 'profile'): ?>
-                    <header class="page-heading developer-profile-page-heading">
-                        <div><p class="eyebrow">YOUR PUBLIC PROFILE</p><h1>Profile</h1><p class="page-description">Share your background and work with clients.</p></div>
-                    </header>
-                    <?php if ($profileError !== ''): ?><p class="error" role="alert"><?php echo htmlspecialchars($profileError, ENT_QUOTES, 'UTF-8'); ?></p><?php endif; ?>
-                    <?php if ($profileSuccess !== ''): ?><p class="success" role="status"><?php echo htmlspecialchars($profileSuccess, ENT_QUOTES, 'UTF-8'); ?></p><?php endif; ?>
-                    <div class="developer-profile-workspace">
-                        <section class="developer-profile-editor">
-                            <header class="developer-public-heading">
-                                <?php if ($profileImage): ?>
-                                    <img class="profile-avatar profile-avatar-large" src="../backend/profile-actions.php?action=profile_image" alt="">
-                                <?php else: ?>
-                                    <span class="profile-avatar profile-avatar-large profile-avatar-fallback" aria-hidden="true"><?php echo htmlspecialchars($initial, ENT_QUOTES, 'UTF-8'); ?></span>
-                                <?php endif; ?>
-                                <div><h2><?php echo htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8'); ?></h2><p><?php echo htmlspecialchars(trim($course . ($course && $yearLevel ? ' • ' : '') . ($yearLevel ?: 'Developer')), ENT_QUOTES, 'UTF-8'); ?></p></div>
-                            </header>
-                            <div class="developer-profile-body">
-                                <section class="profile-photo-panel developer-profile-photo-panel" aria-labelledby="photo-title">
-                                    <?php if ($profileImage): ?>
-                                        <img class="profile-avatar developer-photo-preview" src="../backend/profile-actions.php?action=profile_image" alt="">
-                                    <?php else: ?>
-                                        <span class="profile-avatar profile-avatar-fallback developer-photo-preview" aria-hidden="true"><?php echo htmlspecialchars($initial, ENT_QUOTES, 'UTF-8'); ?></span>
-                                    <?php endif; ?>
-                                    <div class="profile-photo-copy">
-                                        <h3 id="photo-title">Profile picture</h3><p>Use a clear photo so clients can recognize your profile. PNG, JPG, or WebP up to 2 MB.</p>
-                                        <div class="profile-photo-actions">
-                                            <form action="../backend/profile-actions.php" method="POST" enctype="multipart/form-data">
-                                                <input type="hidden" name="action" value="upload_profile_image">
-                                                <label class="button button-primary upload-button" for="developer-profile-image">Choose photo</label>
-                                                <input class="visually-hidden" type="file" id="developer-profile-image" name="profile_image" accept="image/png,image/jpeg,image/webp" required>
-                                                <button class="button button-secondary upload-submit" type="submit">Upload</button>
-                                            </form>
-                                            <?php if ($profileImage): ?><form action="../backend/profile-actions.php" method="POST"><input type="hidden" name="action" value="remove_profile_image"><button class="text-button text-button-danger" type="submit">Remove</button></form><?php endif; ?>
-                                        </div>
-                                    </div>
-                                </section>
-                                <form class="developer-profile-form" action="../backend/profile-actions.php" method="POST">
-                                    <input type="hidden" name="update_profile" value="1">
-                                    <div class="profile-field"><label for="developer-display-name">Name</label><input type="text" id="developer-display-name" name="display_name" maxlength="255" value="<?php echo htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8'); ?>" required></div>
-                                    <div class="profile-field"><label for="developer-course">Course</label><select id="developer-course" name="course" required><?php foreach ($projectOptions['courses'] as $courseOption): ?><option value="<?php echo htmlspecialchars($courseOption, ENT_QUOTES, 'UTF-8'); ?>" <?php echo $course === $courseOption ? 'selected' : ''; ?>><?php echo htmlspecialchars($courseOption, ENT_QUOTES, 'UTF-8'); ?></option><?php endforeach; ?></select></div>
-                                    <div class="profile-field"><label for="developer-year-level">Year level</label><select id="developer-year-level" name="year_level" required><?php foreach ($projectYearLevels as $yearOption): ?><option value="<?php echo htmlspecialchars($yearOption, ENT_QUOTES, 'UTF-8'); ?>" <?php echo $yearLevel === $yearOption ? 'selected' : ''; ?>><?php echo htmlspecialchars($yearOption, ENT_QUOTES, 'UTF-8'); ?></option><?php endforeach; ?></select></div>
-                                    <div class="profile-field"><label for="developer-portfolio">Portfolio link <span>Optional</span></label><input type="url" id="developer-portfolio" name="portfolio_url" value="<?php echo htmlspecialchars($portfolioUrl, ENT_QUOTES, 'UTF-8'); ?>" placeholder="https://"></div>
-                                    <div class="profile-field profile-field-full"><label for="developer-about">About Me</label><textarea id="developer-about" name="about_me" maxlength="3000" rows="5"><?php echo htmlspecialchars($aboutMe, ENT_QUOTES, 'UTF-8'); ?></textarea></div>
-                                    <fieldset class="profile-field profile-field-full skill-options-field">
-                                        <legend>Skills</legend>
-                                        <div class="skill-option-list">
-                                            <?php foreach ($projectOptions['skills'] as $skillOption): ?>
-                                                <label class="skill-option">
-                                                    <input type="checkbox" name="skills[]" value="<?php echo htmlspecialchars($skillOption, ENT_QUOTES, 'UTF-8'); ?>" <?php echo in_array($skillOption, $selectedSkills, true) ? 'checked' : ''; ?>>
-                                                    <span><?php echo htmlspecialchars($skillOption, ENT_QUOTES, 'UTF-8'); ?></span>
-                                                </label>
-                                            <?php endforeach; ?>
-                                        </div>
-                                    </fieldset>
-                                    <p class="profile-field-full social-link-note">Add at least one social link so you can send proposals and appear in Browse Developers.</p>
-                                    <div class="profile-field"><label for="developer-facebook">Facebook <span>Optional if Instagram is set</span></label><input type="url" id="developer-facebook" name="facebook_url" value="<?php echo htmlspecialchars($facebookUrl, ENT_QUOTES, 'UTF-8'); ?>" placeholder="https://facebook.com/username"></div>
-                                    <div class="profile-field"><label for="developer-instagram">Instagram <span>Optional if Facebook is set</span></label><input type="url" id="developer-instagram" name="instagram_url" value="<?php echo htmlspecialchars($instagramUrl, ENT_QUOTES, 'UTF-8'); ?>" placeholder="https://instagram.com/username"></div>
-                                    <button class="button button-primary" type="submit">Save public profile</button>
-                                </form>
-                            </div>
-                        </section>
-                    </div>
-
                 <?php endif; ?>
             </main>
             <dialog class="developer-profile-modal developer-settings-modal" aria-labelledby="developer-profile-title" data-developer-profile-modal>
                 <header class="developer-settings-modal-heading">
-                    <div><p class="eyebrow">YOUR PUBLIC PROFILE</p><h2 id="developer-profile-title"></h2></div>
+                    <div></div>
                     <button class="profile-modal-close" type="button" aria-label="Close profile" data-close-developer-profile>&times;</button>
                 </header>
                 <?php if ($profileError !== ''): ?><p class="error developer-settings-message" role="alert"><?php echo htmlspecialchars($profileError, ENT_QUOTES, 'UTF-8'); ?></p><?php endif; ?>
@@ -714,12 +651,23 @@ $selectedSkills = array_filter(array_map('trim', explode(',', $skills)));
                         <div class="profile-field profile-field-full"><label for="developer-about-modal">About Me</label><textarea id="developer-about-modal" name="about_me" maxlength="3000" rows="5"><?php echo htmlspecialchars($aboutMe, ENT_QUOTES, 'UTF-8'); ?></textarea></div>
                         <fieldset class="profile-field profile-field-full skill-options-field">
                             <legend>Skills</legend>
-                            <div class="skill-option-list">
-                                <?php foreach ($projectOptions['skills'] as $skillOption): ?>
-                                    <label class="skill-option">
-                                        <input type="checkbox" name="skills[]" value="<?php echo htmlspecialchars($skillOption, ENT_QUOTES, 'UTF-8'); ?>" <?php echo in_array($skillOption, $selectedSkills, true) ? 'checked' : ''; ?>>
-                                        <span><?php echo htmlspecialchars($skillOption, ENT_QUOTES, 'UTF-8'); ?></span>
-                                    </label>
+                            <div class="skill-picker-controls">
+                                <label class="visually-hidden" for="developer-skill-select">Select a skill</label>
+                                <select id="developer-skill-select" data-skill-select>
+                                    <option value="">Select a skill</option>
+                                    <?php foreach ($projectOptions['skills'] as $skillOption): ?>
+                                        <option value="<?php echo htmlspecialchars($skillOption, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($skillOption, ENT_QUOTES, 'UTF-8'); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <button class="button button-secondary" type="button" data-add-skill>Add</button>
+                            </div>
+                            <div class="skill-list selected-skill-list" data-selected-skills aria-live="polite">
+                                <?php foreach ($selectedSkills as $skill): ?>
+                                    <span class="skill-chip selected-skill-chip">
+                                        <?php echo htmlspecialchars($skill, ENT_QUOTES, 'UTF-8'); ?>
+                                        <input type="hidden" name="skills[]" value="<?php echo htmlspecialchars($skill, ENT_QUOTES, 'UTF-8'); ?>">
+                                        <button type="button" class="selected-skill-remove" aria-label="Remove <?php echo htmlspecialchars($skill, ENT_QUOTES, 'UTF-8'); ?>" data-remove-skill>&times;</button>
+                                    </span>
                                 <?php endforeach; ?>
                             </div>
                         </fieldset>
@@ -755,6 +703,17 @@ $selectedSkills = array_filter(array_map('trim', explode(',', $skills)));
                             <button class="button button-primary" type="submit" name="update_password">Update password</button>
                         </form>
                     </section>
+                </div>
+            </dialog>
+            <dialog class="action-dialog" id="developer-logout-confirm" aria-labelledby="developer-logout-title" data-action-dialog>
+                <header class="action-dialog-header">
+                    <div><p class="eyebrow">LOG OUT</p><h2 id="developer-logout-title">Log out of your account?</h2></div>
+                    <button class="profile-modal-close" type="button" aria-label="Close confirmation" data-close-dialog>&times;</button>
+                </header>
+                <div class="action-dialog-body"><p>You will return to the AUProject home page.</p></div>
+                <div class="action-dialog-actions">
+                    <button class="button button-secondary" type="button" data-close-dialog>Cancel</button>
+                    <a class="button button-primary" href="index.php">Log out</a>
                 </div>
             </dialog>
         </div>

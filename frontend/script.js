@@ -34,6 +34,77 @@ document.querySelectorAll("[data-toggle-link-editor]").forEach(function (button)
   });
 });
 
+document.querySelectorAll(".developer-profile-form").forEach(function (form) {
+  var select = form.querySelector("[data-skill-select]");
+  var addButton = form.querySelector("[data-add-skill]");
+  var selectedSkills = form.querySelector("[data-selected-skills]");
+
+  if (!(select instanceof HTMLSelectElement) || !addButton || !selectedSkills) {
+    return;
+  }
+
+  function syncSkillOptions() {
+    var selectedValues = new Set(
+      Array.from(selectedSkills.querySelectorAll('input[name="skills[]"]')).map(function (input) {
+        return input.value;
+      }),
+    );
+
+    Array.from(select.options).forEach(function (option) {
+      option.disabled = option.value !== "" && selectedValues.has(option.value);
+    });
+  }
+
+  function addSkill(skill) {
+    var existingInputs = selectedSkills.querySelectorAll('input[name="skills[]"]');
+    if (!skill || Array.from(existingInputs).some(function (input) {
+      return input.value === skill;
+    })) {
+      return;
+    }
+
+    var chip = document.createElement("span");
+    chip.className = "skill-chip selected-skill-chip";
+
+    var label = document.createTextNode(skill);
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "skills[]";
+    input.value = skill;
+
+    var removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "selected-skill-remove";
+    removeButton.setAttribute("aria-label", "Remove " + skill);
+    removeButton.setAttribute("data-remove-skill", "");
+    removeButton.textContent = "\u00d7";
+
+    chip.append(label, input, removeButton);
+    selectedSkills.appendChild(chip);
+    syncSkillOptions();
+  }
+
+  addButton.addEventListener("click", function () {
+    addSkill(select.value);
+    select.value = "";
+  });
+
+  selectedSkills.addEventListener("click", function (event) {
+    if (!(event.target instanceof Element)) {
+      return;
+    }
+
+    var removeButton = event.target.closest("[data-remove-skill]");
+    var chip = removeButton ? removeButton.closest(".selected-skill-chip") : null;
+    if (chip) {
+      chip.remove();
+      syncSkillOptions();
+    }
+  });
+
+  syncSkillOptions();
+});
+
 document.querySelectorAll("[data-account-menu]").forEach(function (menu) {
   var toggle = menu.querySelector("[data-menu-toggle]");
   var dropdown = menu.querySelector("[data-account-dropdown]");
@@ -73,7 +144,7 @@ document.querySelectorAll("[data-account-menu]").forEach(function (menu) {
     if (
       event.target instanceof Element &&
       event.target.closest(
-        "[data-open-developer-settings], [data-open-developer-profile], [data-open-client-profile]",
+        "[data-open-developer-settings], [data-open-developer-profile], [data-open-client-profile], [data-open-dialog]",
       )
     ) {
       setMenuOpen(false);

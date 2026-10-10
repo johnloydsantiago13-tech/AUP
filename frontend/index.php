@@ -65,40 +65,36 @@
                 <div class="container">
                     <div class="form-box <?= showForm('login', $activeForm); ?>" id="loginBox">
                         <div class="form-heading">
-                            <span class="eyebrow">WELCOME BACK</span>
-                            <h2>Sign in to your workspace</h2>
-                            <p>Enter your account details to continue.</p>
+                            <h1>Sign</h1>
                         </div>
                         <?= showError($error['login']); ?>
                         <form class="auth-form" action="../backend/login-reg.php" method="POST">
                             <div class="field">
                                 <label for="login-email">Email address</label>
-                                <input id="login-email" type="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+                                <input id="login-email" type="email" name="email" placeholder="Email" autocomplete="email" required>
                             </div>
                             <div class="field">
                                 <label for="login-password">Password</label>
-                                <input id="login-password" type="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+                                <input id="login-password" type="password" name="password" placeholder="Password" autocomplete="current-password" required>
                             </div>
                             <button type="submit" name="login">Sign in</button>
-                            <p class="form-switch">New to AU Projects? <a href="#register" data-form="register">Create an account</a></p>
+                            <p class="form-switch">New to AU Projects? <a href="#register" data-form="register">Register</a></p>
                         </form>
                     </div>
 
                     <div class="form-box <?= showForm('register', $activeForm); ?>" id="registerBox">
                         <div class="form-heading">
-                            <span class="eyebrow">GET STARTED</span>
-                            <h2>Create your account</h2>
-                            <p>Set up your details to join the workspace.</p>
+                            <h1>Register</h1>
                         </div>
                         <?= showError($error['register']); ?>
                         <form class="auth-form register-form" action="../backend/login-reg.php" method="POST">
                             <div class="field">
                                 <label for="register-username">Username</label>
-                                <input id="register-username" type="text" name="username" placeholder="Choose a username" autocomplete="username" required>
+                                <input id="register-username" type="text" name="username" placeholder="Username" autocomplete="username" required>
                             </div>
                             <div class="field">
                                 <label for="register-email">Email address</label>
-                                <input id="register-email" type="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+                                <input id="register-email" type="email" name="email" placeholder="Email" autocomplete="email" required>
                             </div>
                             <div class="field">
                                 <label for="register-password">Password</label>
@@ -124,8 +120,8 @@
                                 </div>
                             </div>
                             <?= showError($error['ys']); ?>
-                            <button type="submit" name="register">Create account</button>
-                            <p class="form-switch">Already have an account? <a href="#login" data-form="login">Sign in</a></p>
+                            <button type="submit" name="register">Register</button>
+                            <p class="form-switch">Already have an account? <a href="#login" data-form="login">Login</a></p>
                         </form>
                     </div>
                 </div>
